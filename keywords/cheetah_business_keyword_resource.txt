@@ -1,0 +1,3862 @@
+*** Settings ***
+Library           Selenium2Library
+Resource  cheetah_element_keyword_resource.txt
+Resource  riil_common_keyword_resource.txt
+
+
+*** Keywords ***
+
+登录猎豹
+    打开浏览器
+    隐式等待
+    输入登录名和密码
+    登录按钮
+
+输入登录名和密码
+    登录名称    admin
+    登录密码    Riil123$%^
+
+打开Sina测试邮箱
+    Open Browser    https://mail.sina.com.cn/    chrome
+    MAXIMIZE BROWSER WINDOW
+    等待 2s
+    输入名称    Sina测试邮箱  username   liebao657@sina.com
+    输入名称    Sina测试邮箱  password   1qa@WS3ed
+    点击元素    Sina测试邮箱   login    cheetah
+    等待 30s
+
+
+打开菜单项
+    [Arguments]  ${parent_node}   ${child_node}
+    隐式等待
+    菜单项   ${parent_node}
+    等待 2s
+    打开目录   ${parent_node}   ${child_node}
+    等待 2s
+初始化多url业务测试环境
+    [Arguments]    ${business_name}
+    登录猎豹
+    菜单项  business_icon
+    切换业务总览到列表视图
+    等待 2s
+#    编辑多url业务  ${business_name}        http://www.baidu.com    百度   http://www.sohu.com     搜狐
+
+编辑多url业务
+    [Arguments]    ${business_name}     ${url1}   ${alias1}   ${url2}    ${alias2}
+    等待 2s
+    打开指定业务   ${business_name}
+    等待 2s
+    点击查找指定元素   div  配置
+    等待 2s
+    点击查找指定元素   span     基本信息
+    等待 2s
+    输入名称    大数据工具   url     ${url1}
+    等待 2s
+    输入名称    大数据工具   url_alias     ${alias1}
+    ${Status}   Run Keyword and return status   当前页面包含    业务体验    landing_detection_button_open    cheetah
+    Run Keyword If   "${Status}"=="False"   设置业务登录探测
+    等待 2s
+    悬浮鼠标    业务体验   method     cheetah
+    execute javascript  document.documentElement.scrollTop=10000
+    等待 2s
+    输入名称    大数据工具   url1    ${url2}
+    输入名称    大数据工具   url_alias1     ${alias2}
+    等待 2s
+    点击按钮    业务体验      save     cheetah
+    等待 5s
+
+删除已存在业务
+    [Arguments]    ${business_name}
+    等待 2s
+    点击元素    业务体验     search_name   cheetah
+    输入名称    业务体验     search_name   ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 5s
+    ${Status}   Run Keyword and return status  校验字符串    td    ${business_name}
+    Run Keyword If   "${Status}"=="True"   删除业务
+
+删除业务
+    点击元素    业务体验    checkbox    cheetah
+    点击元素    业务体验    delete_business     cheetah
+    等待 2s
+    点击元素    业务体验    ok_button    cheetah
+    等待 2s
+
+校验业务已删除
+    [Arguments]    ${business_name}
+    等待 2s
+    点击元素    业务体验     search_name   cheetah
+    输入名称    业务体验     search_name   ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    校验字符串    span    暂无数据
+    等待 2s
+
+编辑IP基本信息
+    输入空名称    通用    IP_name  请输入名称
+    输入空地址    IP分组管理    IP_address
+    输入多空格名称  通用    IP_name  不能输入空字符
+#    校验输入字符串  通用    IP_name     自动化测试IP组&quot;'    不能包含：\"'\"
+    校验输入字符串  通用    IP_name     '&quot;%()/\:?<"";|&@#*   名称长度，不能超过20
+#    合法名称IP地址为空  通用    IP_name   Automation testing    已存在
+    合法名称IP地址为空  通用    IP_name   cheetah testing    请输入IP地址
+
+校验头部基础信息
+    [Arguments]    ${address_name}
+    等待 2s
+    校验字符串   div      ${address_name}
+    校验字符串   span     资源类型：
+    校验字符串   span     资源归属：
+    校验字符串   span     来源：
+    校验字符串   span     创建时间：
+    校验字符串   span     更新时间：
+    校验字符串   span     创建人：
+    校验字符串   div      属性信息
+    校验字符串   div      关系
+    校验字符串   span     基本信息
+
+添加IP分组名称和IP地址
+    [Arguments]    ${IP_name}   ${IP}
+    悬浮Xpath   通用    add_button    cheetah
+    等待 2s
+    确保IP分组网段被创建     ${IP_name}   ${IP}
+
+
+确保IP分组网段被创建
+    [Arguments]    ${IP_name}   ${IP}
+    点击元素    IP分组管理  search_ip  cheetah
+    输入名称    IP分组管理  search_ip  ${IP_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  div    ${IP_name}
+    Run Keyword If   "${Status}"=="True"   添加IP分组   ${IP_name}   ${IP}
+
+添加IP分组
+    [Arguments]    ${IP_name}   ${IP}
+    点击按钮    通用    add_button    cheetah
+    等待 2s
+    校验字符串    div    添加IP分组
+    输入名称   通用  IP_name  ${IP_name}
+    输入名称   IP分组管理  IP_address  ${IP}
+    保存按钮
+    等待 2s
+
+删除已存在IP分组
+    悬浮Search   div   Automation testing
+    悬浮Xpath   通用   move_to_delete_icon    cheetah
+    点击按钮    通用  delete_icon     cheetah
+    等待 2s
+    点击按钮    通用  ok_button     cheetah
+
+删除大数据已存在IP分组
+    悬浮Search   div   大数据IP组_192_2_网段
+    悬浮Xpath   通用   move_to_delete_icon    cheetah
+    点击按钮    通用  delete_icon     cheetah
+    点击按钮    通用  ok_button     cheetah
+
+添加区域位置
+    [Arguments]    ${address_name}  ${bandwidth}    ${position}
+    ${Status}   Run Keyword and return status   元素没有被显示  span  ${address_name}
+    Run Keyword If   "${Status}"=="True"   添加区域位置名称  ${address_name}  ${bandwidth}  ${position}
+    等待 2s
+
+
+添加区域位置名称
+    [Arguments]    ${address_name}  ${bandwidth}    ${position}
+    等待 2s
+    点击元素    猎豹菜单    location_icon   cheetah
+    添加位置
+#    点击元素    位置管理    add_position_button    cheetah
+    输入名称   通用  IP_name  ${address_name}
+    输入名称   通用  bandwidth  ${bandwidth}
+    从列表中选择上级位置      ${position}
+    保存添加位置
+    等待 2s
+
+校验位置添加成功
+    [Arguments]    ${address_name}
+#    展开列表
+    等待 2s
+    点击已存在位置    ${address_name}
+    等待 2s
+    校验头部基础信息    ${address_name}
+
+创建上级位置
+    [Arguments]    ${address}   ${bandwidth}
+    悬浮鼠标   位置管理    add_position    cheetah
+    等待 2s
+    确保上级位置被创建   ${address}   ${bandwidth}
+
+
+确保WindowShade图标展开
+    [Arguments]    ${address_name}
+    点击查找指定元素    span  ${address_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  div  关系
+    Run Keyword If   "${Status}"=="True"  展开北京列表
+    等待 2s
+
+展开北京列表
+    等待 5s
+    点击元素    位置管理    beijing_expand_icon_1    cheetah
+
+添加上级位置
+    [Arguments]    ${address}   ${bandwidth}
+    添加位置
+    输入名称   通用  IP_name  ${address}
+    输入名称   通用  bandwidth   ${bandwidth}
+    保存添加位置
+    等待 2s
+
+校验输入已存在位置
+    [Arguments]    ${str_name}    ${bandwidth_3}    ${verify_str}    ${position}
+    输入名称    通用    IP_name    ${str_name}
+    模拟退格键Xpath   通用   bandwidth   cheetah
+    模拟退格键Xpath   通用   bandwidth   cheetah
+    输入名称   通用  bandwidth  ${bandwidth_3}
+    校验增加减小按钮
+    从列表中选择上级位置  ${position}
+    保存添加位置
+    等待 5s
+    校验字符串    div    ${verify_str}
+
+编辑位置基本信息
+    [Arguments]    ${str_name}  ${bandwidth_1}  ${prompt_1}    ${bandwidth_2}  ${prompt_2}   ${bandwidth_3}   ${position}
+#    点击元素    位置管理    add_position_button    cheetah
+    输入空名称    通用    IP_name  请输入名称
+    输入带宽为小数     ${bandwidth_1}  ${prompt_1}
+    输入多空格名称  通用    IP_name  不能输入空字符
+    输入带宽为负数     ${bandwidth_2}  ${prompt_2}
+#    校验输入字符串  通用    IP_name     自动化测试IP组&quot;  不能输入特殊字符
+    校验输入字符串  通用    IP_name     '&quot;%()/\:?<"";|&@#*   名称长度，不能超过20
+    校验输入已存在位置  ${str_name}   ${bandwidth_3}     该名称已存在，请重新输入   ${position}
+    等待 2s
+    点击按钮    位置管理    close_icon  cheetah
+    等待 2s
+
+输入带宽为小数
+    [Arguments]    ${bandwidth_1}  ${prompt_1}
+    输入名称   通用  bandwidth  ${bandwidth_1}
+    点击按钮    位置管理    save_button    cheetah
+    等待 2s
+    校验字符串    div    ${prompt_1}
+
+输入带宽为负数
+    [Arguments]    ${bandwidth_2}  ${prompt_2}
+    模拟退格键Xpath   通用   bandwidth   cheetah
+    模拟退格键Xpath   通用   bandwidth   cheetah
+    模拟退格键Xpath   通用   bandwidth   cheetah
+    输入名称   通用  bandwidth    ${bandwidth_2}
+    等待 2s
+    点击按钮    位置管理    save_button    cheetah
+    等待 2s
+    校验字符串    div    ${prompt_2}
+
+校验增加减小按钮
+    点击元素    位置管理  up_bandwidth   cheetah
+    当前页面包含      位置管理    bandwidth_101   cheetah
+    等待 2s
+    点击元素    位置管理  down_bandwidth   cheetah
+    当前页面包含      位置管理    bandwidth_100   cheetah
+    等待 2s
+
+删除已存在位置
+    [Arguments]    ${address_name}
+    悬浮Search   span   ${address_name}
+    等待 2s
+    点击元素    位置管理  delete_icon   cheetah
+    点击按钮    通用  ok_button     cheetah
+
+删除已存在位置（Automation group）
+    [Arguments]    ${address_name}
+    悬浮Search   span   ${address_name}
+    等待 2s
+    点击元素    位置管理  delete_icon111   cheetah
+    点击按钮    通用  ok_button     cheetah
+
+删除大数据已存在位置
+    悬浮Search   span   天津办公区_169区
+    等待 2s
+    点击元素    位置管理  big_data_delete_icon   cheetah
+    点击按钮    通用  ok_button     cheetah
+
+初始化位置管理测试环境
+    [Arguments]    ${address_name}
+    登录猎豹
+    打开菜单项  sc_icon  location_icon
+    悬浮鼠标   位置管理    add_position    cheetah
+    等待 2s
+    删除位置管理垃圾数据   ${address_name}
+    等待 2s
+    点击元素  猎豹菜单  return  cheetah
+
+准备区域位置测试环境
+    登录猎豹
+    打开菜单项  sc_icon  location_icon
+    悬浮鼠标   位置管理    add_position    cheetah
+    等待 2s
+    确保上级位置被创建
+    等待 2s
+    点击元素  猎豹菜单  return  cheetah
+
+确保上级位置被创建
+    [Arguments]    ${address}   ${bandwidth}
+    ${Status}   Run Keyword and return status   元素没有被显示  span   ${address}
+    Run Keyword If   "${Status}"=="True"   添加上级位置  ${address}   ${bandwidth}
+
+
+初始化IP分组管理测试环境
+    登录猎豹
+    打开菜单项  sc_icon  ip_icon
+    悬浮鼠标   通用    add_button    cheetah
+    等待 2s
+    删除IP分组管理垃圾数据
+    等待 2s
+    点击元素  猎豹菜单  return  cheetah
+
+初始化仿真点管理测试环境
+    登录猎豹
+    打开菜单项  sc_icon  simulation_icon
+    悬浮鼠标   通用    add_button    cheetah
+    等待 2s
+    删除仿真点管理垃圾数据
+    等待 2s
+    点击元素  猎豹菜单  return  cheetah
+
+准备域管理员加入/移除成员测试环境
+    [Arguments]    ${name}  ${domain_name}
+    登录猎豹
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    打开菜单项  sc_icon  organization_icon
+    等待 2s
+    悬浮鼠标   人员组织    add_department    cheetah
+    等待 2s
+    点击查找指定元素  span  集团
+    等待 2s
+    点击查找指定元素  div   用户列表
+    确保已存在多个域用户  ${name}     ${domain_name}
+    等待 2s
+     ${Status}   Run Keyword and return status   校验字符串   td     集团域管理员(集团)
+    Run Keyword If   "${Status}"=="True"   移除集团管理员     ${name}
+    等待 2s
+
+确保已存在多个域用户
+   [Arguments]    ${user_name}     ${domain_name}
+   搜索用户     ${user_name}
+   ${Status}   Run Keyword and return status   校验字符串   div  暂无数据
+    Run Keyword If   "${Status}"=="True"   新建用户    ${user_name}     ${domain_name}
+
+
+
+准备增加仿真拨测点测试环境
+    登录猎豹
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项  warehouse_icon
+    等待 2s
+    悬浮鼠标  资源仓库     system_admin     cheetah
+    等待 2s
+    点击元素    位置管理  expand_icon   cheetah
+    等待 2s
+    点击查找指定元素  span  业务应用
+    等待 2s
+    确保测试业务被创建
+    等待 2s
+    校验测试业务创建成功
+
+确保测试业务被创建
+    点击元素    大数据工具  resource_name_field  cheetah
+    输入名称    大数据工具  resource_name_field  业务_Auto_NPM_auto
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  div  业务_Auto_NPM_auto
+    Run Keyword If   "${Status}"=="True"   新建测试业务   业务_Auto_NPM_auto
+
+新建测试业务
+    [Arguments]    ${str_name}
+    悬浮Xpath   通用    add_button    cheetah
+    等待 2s
+    点击按钮    通用    add_button111    cheetah
+    等待 2s
+    校验字符串    div    添加资源
+    等待 2s
+    输入名称    大数据工具   business_name   ${str_name}
+    等待 2s
+    点击查找指定元素  span  核心
+    等待 2s
+    点击查找指定元素  span  高频
+    等待 2s
+    点击按钮    仿真点管理  confirm_button     cheetah
+
+校验测试业务创建成功
+    点击元素    大数据工具  resource_name_field  cheetah
+    输入名称    大数据工具  resource_name_field  业务_Auto_NPM_auto
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    校验字符串    div    业务_Auto_NPM_auto
+
+删除大数据业务应用垃圾数据
+    [Arguments]    ${business_name}
+    点击元素    大数据工具  resource_name_field  cheetah
+    输入名称    大数据工具  resource_name_field  ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  div  ${business_name}
+    Run Keyword If   "${Status}"=="False"   删除大数据已存在业务应用    ${business_name}
+
+下载已存在仿真点
+    悬浮Search   div   Automation testing
+    等待 2s
+    悬浮Xpath   仿真点管理   move_to_download_icon    cheetah
+    等待 2s
+    点击按钮    仿真点管理   download_icon     cheetah
+    等待 2s
+
+成功下载
+    [Arguments]    ${download}
+    校验字符串    div     ${download}
+    等待 2s
+
+删除已存在仿真点
+    悬浮Search   div   Automation testing
+    等待 2s
+    悬浮Xpath   通用   move_to_delete_icon    cheetah
+    等待 2s
+    点击按钮    通用  delete_icon     cheetah
+    等待 2s
+    点击按钮    通用  ok_button     cheetah
+
+注册仿真点
+    [Arguments]    ${simulation_name}    ${ip}
+    悬浮Xpath   通用    add_button    cheetah
+    等待 2s
+    点击元素    仿真点管理  simulation_name  cheetah
+    输入名称    仿真点管理  simulation_name  ${simulation_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  div  ${simulation_name}
+    Run Keyword If   "${Status}"=="True"   新建仿真点   ${simulation_name}    ${ip}
+
+新建仿真点
+    [Arguments]    ${simulation_name}    ${ip}
+    悬浮Xpath   通用    add_button    cheetah
+    等待 2s
+    点击按钮    通用    add_button111    cheetah
+    等待 2s
+    校验字符串    div    注册仿真点
+    校验字符串    span    生成注册文件
+    输入名称   通用  IP_name  ${simulation_name}
+    按键    通用  IP_name    TAB    cheetah
+    输入名称   仿真点管理  ip_address  ${ip}
+    保存按钮
+    等待 2s
+    校验字符串    div      ${simulation_name}
+
+编辑仿真点基本信息
+    悬浮Xpath   通用    add_button    cheetah
+    等待 2s
+    点击按钮    通用    add_button111    cheetah
+    等待 2s
+    校验字符串    div    注册仿真点
+    校验字符串    span    生成注册文件
+    等待 2s
+    输入空名称    通用    IP_name  请输入名称
+    输入空地址    仿真点管理  ip_address
+    输入多空格名称  通用    IP_name  不能输入空字符
+    校验输入字符串  通用    IP_name     '&quot;%()/\:?<"";|&@#*   名称长度，不能超过20
+    合法名称IP地址为空  通用    IP_name   cheetah testing    请输入IP地址
+#    校验输入已存在位置  Automation testing    该名称已存在，请重新输入
+
+初始化人员组织测试环境
+    登录猎豹
+    打开菜单项  sc_icon  organization_icon
+    悬浮鼠标   人员组织    add_department    cheetah
+    等待 5s
+    删除人员组织垃圾数据
+    等待 5s
+    点击元素  猎豹菜单  return  cheetah
+
+删除已存在测试部门
+    等待 5s
+    悬浮Search   span   自动化组
+    等待 5s
+    点击元素    人员组织  delete_icon   cheetah
+    等待 5s
+    点击按钮    通用  ok_button     cheetah
+
+列表不存在创建
+    [Arguments]    ${department_name}
+    悬浮Xpath  人员组织    add_department    cheetah
+    等待 2s
+     ${Status}   Run Keyword and return status   校验页面元素不可见  位置管理    expand_icon    cheetah
+    Run Keyword If   "${Status}"=="True"   新建部门  ${department_name}
+
+新建部门
+    [Arguments]    ${department_name}
+    添加部门
+    输入名称  人员组织  department_name     ${department_name}
+    等待 2s
+    从列表中选择上级部门
+    点击元素    人员组织     decribel       cheetah
+    输入名称   人员组织     decribel   ${department_name}
+    点击按钮    人员组织    save_department_button     cheetah
+
+校验事业部是否存在
+    [Arguments]    ${department_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  span    ${department_name}
+    Run Keyword If   "${Status}"=="True"   新建部门   ${department_name}
+    校验新建部门成功  ${department_name}
+
+校验新建部门成功
+    [Arguments]    ${department_name}
+    校验字符串  span     ${department_name}
+
+列表不存在创建子部门
+    [Arguments]    ${department_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   校验页面元素不可见  位置管理    expand_icon    cheetah     #校验RIIL事业部前面按钮是否存在
+    Run Keyword If   "${Status}"=="True"   新建子部门  ${department_name}
+
+新建子部门
+    [Arguments]    ${department_name}
+    添加部门
+    输入名称  人员组织  department_name     ${department_name}
+    点击按钮    人员组织    save_department_button     cheetah
+
+#新建子部门
+#    [Arguments]    ${department_name}
+#    添加部门
+#    输入名称  人员组织  department_name     ${department_name}
+#    选择上级部门  RIIL事业部
+#    点击按钮    人员组织    save_department_button     cheetah
+#
+#选择上级部门
+#    [Arguments]    ${department_name}
+#    点击元素    位置管理   position_selector    cheetah
+#    等待 2s
+#    点击按钮    人员组织    click_button    cheetah
+#    点击查找指定元素    li    ${department_name}
+##    点击元素    人员组织    default_item    cheetah
+
+校验子部门是否存在
+    [Arguments]    ${department_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  span    ${department_name}        #校验BMC产线是否存在
+    Run Keyword If   "${Status}"=="True"   新建子部门   ${department_name}                        #不存在--新建子部门
+    校验新建部门成功  ${department_name}
+
+
+校验部门基础信息
+    等待 2s
+    校验字符串   div      自动化组
+    校验字符串   div      基本信息
+    校验字符串   div      用户列表
+
+点击集团
+    悬浮Xpath  人员组织    add_department    cheetah
+    等待 2s
+    点击元素    位置管理   department_position    cheetah
+
+校验基础信息
+    [Arguments]    ${department_name}  ${basic_information}  ${user_list}
+    等待 2s
+    校验字符串   div      ${department_name}
+    校验字符串   div      ${basic_information}
+    校验字符串   div      ${user_list}
+
+创建用户
+    [Arguments]    ${user_name}  ${domain_name}
+    搜索用户  ${user_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  span    ${user_name}
+    Run Keyword If   "${Status}"=="True"   新建用户   ${user_name}  ${domain_name}
+
+新建用户
+    [Arguments]    ${user_name}  ${domain_name}
+    点击按钮    人员组织    new_user_button     cheetah
+    等待 5s
+    输入名称    人员组织    user_name   ${user_name}
+    输入名称    人员组织    pass_word   Hello@123
+    输入名称    人员组织    name   ${user_name}
+    等待 2s
+    点击查找指定元素  span  男
+    等待 2s
+    输入名称    人员组织    tel   010-1234567
+    等待 2s
+    输入名称    人员组织    mailbox   tianqingbo@ruijie.com.cn
+    等待 2s
+    输入名称    人员组织    phone   15810858585
+    等待 2s
+    点击元素    位置管理   position_selector    cheetah
+    点击查找指定元素  li  ${domain_name}
+    等待 2s
+#    按键      人员组织     prosition  TAB    cheetah
+    点击查找指定元素   label    所属域
+    等待 2s
+    点击按钮    人员组织    save_user_button     cheetah
+    等待 2s
+    搜索用户  ${user_name}
+    等待 2s
+
+搜索用户
+    [Arguments]    ${user_name}
+    等待 2s
+    输入名称    人员组织  search_user  ${user_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+
+校验新建用户成功
+    [Arguments]    ${user_name}
+    校验字符串  span     ${user_name}
+打开新建用户界面
+    点击按钮    人员组织    new_user_button     cheetah
+    等待 5s
+
+校验新建用户必填项
+    [Arguments]    ${user_name}  ${domain_name}
+    校验字符串   div     新建用户
+    等待 2s
+    输入名称    人员组织    pass_word   123
+    点击元素    人员组织    name   cheetah
+    等待 2s
+    校验字符串   div     请输入8-32位英文字母（区分大小写）、阿拉伯数字、特殊字符（不包含空格）组合
+    输入名称    人员组织    tel   021-12、、
+    点击元素   人员组织    mailbox   cheetah
+    等待 2s
+    校验字符串   div     电话号码格式不正确
+    输入名称    人员组织    user_name   ${user_name}
+    输入名称    人员组织    pass_word   123456
+    输入名称    人员组织    name   ${user_name}
+    等待 2s
+    输入名称    人员组织    tel   010-1234567
+    点击元素    人员组织    checked   cheetah
+    等待 2s
+    点击元素    位置管理   position_selector    cheetah
+    点击查找指定元素  li     ${domain_name}
+    等待 2s
+    点击查找指定元素   label    所属域
+    等待 2s
+    点击按钮    人员组织    save_user_button     cheetah
+    等待 2s
+
+
+编辑部门基本信息
+    输入多空格名称  人员组织  department_name  请输入部门名称!
+    校验输入字符串  人员组织  department_name     '&quot;%()/\:?<"";|&@#*   部门名称不能超过10个字符!
+    校验输入已存在部门  自动化组    部门名称重复
+    点击按钮    人员组织    cancel_department_button  cheetah
+
+
+打开用户详情
+    点击查找指定元素    span    Qingbo_test
+    等待 2s
+
+编辑用户详情信息
+    校验字符串   div     基本信息
+    等待 2s
+    输入名称    人员组织    tel   021-12345678
+    等待 2s
+    点击按钮    人员组织    save_user_button     cheetah
+    等待 2s
+    点击查找指定元素    span    Qingbo_test
+    等待 2s
+    点击查找指定元素    div    角色信息
+    等待 2s
+    点击按钮    人员组织    new_roles   cheetah
+    等待 2s
+    点击查找指定元素    span    集团域管理员
+    等待 2s
+    点击按钮    人员组织    close_icon   cheetah
+    校验字符串  td     集团域管理员
+
+删除部门
+    删除已存在测试部门
+
+校验错误提示
+    校验字符串  span     自动化组
+
+删除用户
+    等待 5s
+    点击元素    人员组织    table_Qingbo_test_checkbox   cheetah
+    等待 5s
+    点击按钮    人员组织    delete_button   cheetah
+    等待 5s
+    点击按钮    人员组织    save_user_button   cheetah
+
+校验部门被删除
+    等待 5s
+    验证字符串不存在   span     自动化组
+
+
+校验用户被删除
+    等待 5s
+    验证字符串不存在   td     Qingbo_test
+
+点击添加域按钮
+    点击按钮    域    add_domain     cheetah
+
+添加域
+    [Arguments]    ${domain_name}
+    点击添加域按钮
+    输入名称   域  domain_name   ${domain_name}
+    点击按钮    域    save_button     cheetah
+
+校验域添加成功
+    [Arguments]    ${domain_name}
+    ${Status}   Run Keyword and return status   当前页面包含  位置管理  expand_icon    cheetah
+    Run Keyword If   "${Status}"=="True"   点击元素     位置管理  expand_icon    cheetah
+    等待 2s
+    校验字符串  span     ${domain_name}
+
+校验域基本信息
+    等待 2s
+    校验字符串   div     自动化组
+    校验字符串   div     基本信息
+    校验字符串   div     域用户列表
+    校验字符串   div     角色列表
+    校验字符串   div     资源列表
+
+编辑域基本信息
+    输入多空格名称  域    domain_name  请输入域名称
+    校验输入字符串  域    domain_name     '&quot;%()/\:?<"";|&@#*   域名称不能超过10个字符!
+    校验输入已存在域  自动化组    域名称重复
+    输入名称   域  domain_description    域名
+    点击按钮    通用    cancel_button  cheetah
+
+打开角色列表
+    点击查找指定元素    div    角色列表
+
+搜索域管理员
+    [Arguments]    ${role_name}
+    悬浮Xpath   通用    add_button    cheetah
+    等待 2s
+    输入名称    角色管理    input_role_name    ${role_name}
+    暂停
+    点击元素   角色管理     search_role     cheetah
+
+校验过滤可见
+    [Arguments]    ${role_name1}    ${role_name2}
+    等待 2s
+    校验字符串   div     ${role_name1}
+    校验字符串   div     ${role_name2}
+
+校验过滤结果
+    [Arguments]    ${role_name1}
+    等待 2s
+    校验字符串   td     ${role_name1}
+
+点击管理员
+     [Arguments]    ${role_name}
+    点击查找指定元素    div    ${role_name}
+    等待 2s
+
+打开成员列表
+    点击查找指定元素  div   成员列表
+    等待 2s
+
+校验“成员列表”高亮显示
+    当前页面包含    人员组织    user_list_light   cheetah
+
+显示成员列表
+    等待 2s
+    校验字符串   span     用户名
+    校验字符串   span     姓名
+    校验字符串   span     部门
+    校验字符串   span     启用状态
+
+点击加入成员
+    [Arguments]    ${user_name}
+   等待 2s
+   点击按钮    角色管理  add_role_user    cheetah
+   等待 2s
+   弹出“加入成员”窗口
+   过滤成员    ${user_name}
+   校验过滤结果  ${user_name}
+   等待 2s
+   全选  角色管理    checkbox_all    cheetah
+   等待 2s
+   点击按钮   角色管理    add_role_add   cheetah
+
+弹出“加入成员”窗口
+    等待 2s
+    校验字符串   div     加入成员
+    校验字符串   span     用户名
+    校验字符串   span     姓名
+    校验字符串   span     部门
+    校验字符串   span     启用状态
+
+过滤成员
+    [Arguments]    ${role_name}
+    输入名称    角色管理   input_role_name2   ${role_name}
+    暂停
+    点击元素   角色管理    search_role2     cheetah
+
+加入成员
+    点击按钮    角色管理  add_role_user    cheetah
+    等待 2s
+    弹出“加入成员”窗口
+    等待 2s
+    校验是否存在可加入成员
+
+
+加入某部门成员
+    [Arguments]   ${role_name}  ${role_department}
+    等待 2s
+    输入名称    角色管理   input_role_name1   ${role_name}
+    暂停
+    点击元素   角色管理    search_role1     cheetah
+    ${Status}   Run Keyword and return status   校验字符串   td  ${role_department}
+    Run Keyword If    "${Status}"=="False"    点击加入成员     ${role_name}
+    等待 2s
+
+校验某部门成员被加入
+    [Arguments]    ${role_name}     ${role_department}
+    等待 2s
+    校验字符串   td    ${role_name}
+    校验字符串   td    ${role_department}
+
+校验是否存在可加入成员
+    ${Status}   Run Keyword and return status   当前页面包含  角色管理   none_user   cheetah
+    Run Keyword If    "${Status}"=="False"      加入当前页全部成员
+    ...  ELSE   点击元素     角色管理    close_x     cheetah
+
+加入当前页全部成员
+    全选  角色管理    checkbox_all    cheetah
+    校验是否全选
+    点击按钮   角色管理    add_role_add   cheetah
+    等待 2s
+
+校验是否全选
+    当前页面不包含  角色管理   null_checkbox   cheetah     1
+
+校验成员被加入
+    [Arguments]    ${role_name}
+    等待 2s
+    输入名称    角色管理   input_role_name1   ${role_name}
+    等待 2s
+    点击元素   角色管理    search_role1     cheetah
+    等待 2s
+    校验字符串   td    ${role_name}
+    等待 2s
+
+进入集团域管理员成员列表
+    输入登录名和密码
+    登录按钮
+    打开目录  sc_icon  role_icon
+    搜索域管理员   集团
+    点击管理员  集团域管理员
+    打开成员列表
+
+进入系统管理员成员列表
+    输入登录名和密码
+    登录按钮
+    等待 2s
+    打开目录  sc_icon  role_icon
+    等待 2s
+    搜索域管理员   系统管理员
+    点击管理员  系统管理员
+    等待 2s
+    打开成员列表
+
+移除成员
+    [Arguments]    ${role_name}
+    等待 2s
+    输入名称    角色管理   input_role_name1   ${role_name}
+    暂停
+    按键    角色管理  search_role1  ENTER    cheetah
+    #点击元素   角色管理    search_role1     cheetah
+    等待 2s
+    点击按钮   角色管理    checkbox1    cheetah
+    等待 2s
+    点击按钮   角色管理     delete_role_member  cheetah
+    等待 2s
+    校验字符串   span     确认移除用户?
+    等待 5s
+    点击按钮    告警策略    save_button    cheetah
+
+校验成员被删除
+    [Arguments]    ${role_name}
+    等待 2s
+    校验字符串   div     暂无数据
+
+搜索成员列表
+    [Arguments]    ${role_name}
+    点击查找指定元素  div   基本信息
+    等待 2s
+    点击查找指定元素   div  成员列表
+    等待 2s
+    输入名称    角色管理   input_role_name1   ${role_name}
+    暂停
+    点击元素   角色管理    search_role1     cheetah
+
+校验某管理员基础信息
+    [Arguments]    ${role_name}
+    等待 2s
+    校验字符串   div     ${role_name}
+    校验字符串   div     基本信息
+    校验字符串   div     成员列表
+    校验字符串   label     角色名称
+    校验字符串   label     描述
+    校验字符串   label     是否启用
+
+校验角色信息
+   [Arguments]    ${domain_name}
+    校验字符串   span     ${domain_name}
+    校验字符串   td     已启用
+
+删除已存在域
+#    [Arguments]    ${domain_name}
+    悬浮Search   span   自动化组
+    等待 2s
+    点击元素    人员组织  delete_icon   cheetah
+    点击按钮    通用  ok_button     cheetah
+
+校验域被删除
+    [Arguments]    ${domain_name}
+    等待 2s
+    验证字符串不存在   span     ${domain_name}
+
+初始化域管理测试环境
+    登录猎豹
+    打开菜单项  sc_icon  domain_icon
+    悬浮鼠标   域    add_domain    cheetah
+    等待 2s
+    删除域管理垃圾数据
+    等待 2s
+    点击元素  猎豹菜单  return  cheetah
+
+搜索角色名称
+    [Arguments]    ${role_name}
+    等待 2s
+    点击元素    角色管理  search_role3  cheetah
+    输入名称    角色管理  search_role3  ${role_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+
+角色不存在创建
+    [Arguments]    ${role_name_1}  ${domain_name_1}
+    搜索角色名称  ${role_name_1}
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  div    ${role_name_1}
+    Run Keyword If   "${Status}"=="True"   新建角色   ${role_name_1}  ${domain_name_1}
+
+新建角色
+    [Arguments]    ${role_name}  ${domain_name}
+    添加新角色
+    输入名称   角色管理  role_name  ${role_name}
+    点击元素    位置管理   position_selector    cheetah
+    等待 2s
+    点击查找指定元素  li  ${domain_name}
+    等待 2s
+    点击按钮    角色管理  save_button     cheetah
+
+校验角色被创建
+    [Arguments]    ${role_name_1}
+    校验字符串  div  ${role_name_1}
+
+校验普通角色被创建
+    [Arguments]    ${role_name_1}  ${role_name_2}  ${role_name_3}
+    校验字符串  div  ${role_name_1}
+    校验字符串  div  ${role_name_2}
+    校验字符串  div  ${role_name_3}
+
+点击已存在的角色
+    [Arguments]    ${role_name}
+    点击查找指定元素    div    ${role_name}
+    等待 2s
+
+成员不存在创建
+    [Arguments]    ${role_name}
+    搜索用户名  ${role_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  td   ${role_name}
+    Run Keyword If   "${Status}"=="True"   点击加入成员用户  ${role_name}
+
+搜索用户名
+    [Arguments]    ${role_name}
+    等待 2s
+    点击元素    人员组织  search_user  cheetah
+    输入名称    人员组织  search_user  ${role_name}
+    点击元素    角色管理  search_user_name   cheetah
+    等待 2s
+
+点击加入成员用户
+    [Arguments]    ${role_name}
+    点击元素  角色管理  add_role_user  cheetah
+    搜索成员用户   ${role_name}
+    点击按钮  角色管理  click_button  cheetah
+    等待 2s
+    点击按钮  角色管理  join_user  cheetah
+    等待 2s
+
+搜索成员用户
+    [Arguments]    ${role_name}
+    等待 2s
+    点击元素    角色管理  search_role_user  cheetah
+    输入名称    角色管理  search_role_user  ${role_name}
+    点击元素    角色管理  search_role_user_icon   cheetah
+    等待 2s
+
+设定资源权限
+    ${Status}   Run Keyword and return status   校验页面元素不可见  角色管理  checked   cheetah
+    Run Keyword If   "${Status}"=="True"   点击权限  业务
+    点击按钮    角色管理  save_button_setting     cheetah
+
+点击权限
+    [Arguments]    ${role_name}
+    点击查找指定元素  span  ${role_name}
+
+设定功能菜单权限
+    ${Status}   Run Keyword and return status   校验页面元素不可见  角色管理  yewu_button  cheetah
+    Run Keyword If   "${Status}"=="True"   点击权限  业务体验中心
+    点击按钮    角色管理  save_button_gongneng     cheetah
+
+添加域用户角色信息
+    [Arguments]    ${domain_name}   ${role_name}
+    打开目录  sc_icon  role_icon
+    搜索域管理员   ${domain_name}
+    点击管理员  ${domain_name}
+    打开成员列表
+    成员不存在创建  ${role_name}
+
+域用户是否存在
+    [Arguments]    ${role_name}
+    过滤成员    ${role_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  span    ${role_name}
+    Run Keyword If   "${Status}"=="True"   加入成员
+
+退出当前管理员账户
+    [Arguments]    ${user_name}
+    点击查找指定元素  span  ${user_name}
+    等待 2s
+    点击元素    通用     logout   cheetah
+#    点击查找指定元素  font  注销
+
+校验退出到登录页
+    当前页面包含       角色管理    Login_page   cheetah
+
+员工登录猎豹
+    [Arguments]    ${user_name}
+    隐式等待
+    登录名称    ${user_name}
+    登录密码    Hello@123
+    点击按钮    登录页    login_button    cheetah
+    等待 2s
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+
+校验员工菜单权限
+    等待 2s
+    元素没有被显示   div   您没有任何功能的访问权限，请联系管理员!
+    校验集团域管理员菜单权限     分组管理   位置    仿真    人员    角色    通知
+
+校验集团域管理员菜单权限
+    [Arguments]    ${privilege_name_1}  ${privilege_name_2}  ${privilege_name_3}    ${privilege_name_4}  ${privilege_name_5}  ${privilege_name_6}
+    菜单项  sc_icon
+    等待 2s
+    校验字符串  div     ${privilege_name_1}
+    校验字符串  div     ${privilege_name_2}
+    校验字符串  div     ${privilege_name_3}
+    校验字符串  div     ${privilege_name_4}
+    校验字符串  div     ${privilege_name_5}
+    校验字符串  div     ${privilege_name_6}
+#    校验字符串  div     ${privilege_name_7}
+    当前页面包含       猎豹菜单    authorization_icon   cheetah
+    等待 2s
+
+校验员工无菜单权限
+    [Arguments]    ${user_name}
+    隐式等待
+    登录名称    ${user_name}
+    登录密码    Hello@123
+    点击按钮    登录页    login_button    cheetah
+    等待 2s
+    校验字符串   div   您没有任何功能的访问权限，请联系管理员!
+
+校验员工无法登录
+    [Arguments]    ${user_name}
+    隐式等待
+    登录名称    ${user_name}
+    登录密码    Hello@123
+    点击按钮    登录页    login_button    cheetah
+    等待 2s
+    当前页面包含       角色管理    Login_page   cheetah
+
+校验系统管理员菜单权限
+    [Arguments]    ${privilege_name_1}  ${privilege_name_2}  ${privilege_name_3}    ${privilege_name_4}  ${privilege_name_5}  ${privilege_name_6}   ${privilege_name_7}
+#    打开目录  sc_icon  role_icon
+    菜单项  sc_icon
+    校验字符串  div     ${privilege_name_1}
+    校验字符串  div     ${privilege_name_2}
+    校验字符串  div     ${privilege_name_3}
+    校验字符串  div     ${privilege_name_4}
+    校验字符串  div     ${privilege_name_5}
+    校验字符串  div     ${privilege_name_6}
+    校验字符串  div     ${privilege_name_7}
+#    校验字符串  div     ${privilege_name_8}
+    当前页面包含       猎豹菜单    authorization_icon   cheetah
+
+校验域用户管理员菜单权限
+    [Arguments]    ${privilege_name_1}  ${privilege_name_2}  ${privilege_name_3}
+#    打开目录  sc_icon  role_icon
+    菜单项  sc_icon
+    校验字符串  div     ${privilege_name_1}
+    校验字符串  div     ${privilege_name_2}
+    校验字符串  div     ${privilege_name_3}
+#    校验字符串  div     ${privilege_name_4}
+    当前页面包含       猎豹菜单    authorization_icon   cheetah
+
+返回到列表视图
+    [Arguments]    ${user_name}
+    等待 2s
+    悬浮Search   span   ${user_name}
+	等待 2s
+    点击元素  猎豹菜单  return  cheetah
+    菜单项  business_icon
+
+查看业务和添加业务权限
+    [Arguments]     ${prompt1}     ${business_name}    ${operation_overview}
+    添加业务权限
+    等待 2s
+    可以添加    ${prompt1}
+    等待 2s
+    查看业务权限      ${business_name}
+    等待 2s
+    可以查看    ${operation_overview}
+
+添加业务权限
+    切换业务总览到列表视图
+    悬浮Xpath   大数据工具  add_button   cheetah
+    等待 2s
+    点击按钮    大数据工具  add_button     cheetah
+    等待 2s
+
+可以添加
+    [Arguments]     ${prompt1}
+    校验字符串   span    ${prompt1}
+    等待 2s
+    点击按钮    业务体验  cancel_button     cheetah
+    等待 5s
+
+查看业务权限
+    [Arguments]      ${business_name}
+    点击元素    业务体验     search_name   cheetah
+    输入名称    业务体验     search_name   ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+#    点击查找指定元素    td    ${business_name}
+    点击元素    业务体验     business_name_address    cheetah
+    等待 2s
+
+可以查看
+    [Arguments]  ${operation_overview}
+    校验字符串   div    ${operation_overview}
+    等待 2s
+
+校验角色权限创建成功
+    [Arguments]    ${privilege_name_1}  ${privilege_name_2}  ${privilege_name_3}
+    等待 2s
+    校验字符串  div     ${privilege_name_1}
+    校验字符串  div     ${privilege_name_2}
+    校验字符串  div     ${privilege_name_3}
+
+准备无权限新建用户测试环境
+    [Arguments]    ${user_name}     ${domain_name}  ${role_name}    ${business_name}
+    登录猎豹
+    创建无权限用户     ${user_name}     ${domain_name}
+    创建无权限角色     ${role_name}   ${user_name}     ${business_name}
+
+创建无权限角色
+    [Arguments]    ${role_name}   ${user_name}  ${business_name}
+    打开目录  sc_icon  role_icon
+    等待 2s
+    悬浮鼠标  资源仓库     system_admin     cheetah
+    等待 2s
+    输入名称    角色管理    input_role_name    ${role_name}
+    暂停
+    点击元素   角色管理     search_role     cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   校验字符串   div     ${role_name}
+    Run Keyword If   "${Status}"=="True"   删除已存在角色  ${role_name}
+    添加角色    ${role_name}
+    等待 2s
+    加入无权限成员     ${role_name}   ${user_name}
+    等待 2s
+    展开角色资源读写权限面板
+    加入指定资源  ${business_name}
+    等待 2s
+    分配角色功能菜单权限
+    等待 2s
+
+分配角色功能菜单权限
+    点击查找指定元素  div  功能菜单权限
+    等待 2s
+    点击查找指定元素  span  业务总览
+    等待 2s
+    点击查找指定元素  span  访问请求列表
+    等待 2s
+    点击查找指定元素  span  告警级别设置
+    点击查找指定元素  span  资源仓库
+    等待 2s
+    点击元素    角色管理    save_button_setting     cheetah
+    等待 2s
+加入指定资源
+    [Arguments]   ${field_name}
+    等待 2s
+    点击按钮    角色管理  add_resource     cheetah
+    等待 2s
+    点击元素    告警策略  add_resource_search_field  cheetah
+    输入名称    告警策略  add_resource_search_field     ${field_name}
+    点击元素    告警策略  add_resource_search_icon   cheetah
+    等待 2s
+    点击元素   告警策略    business_check   cheetah
+    等待 2s
+    点击按钮    告警策略    save_button    cheetah
+
+创建无权限用户
+    [Arguments]    ${user_name}     ${domain_name}
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    打开菜单项  sc_icon  organization_icon
+    等待 2s
+    悬浮鼠标   人员组织    add_department    cheetah
+    等待 2s
+    点击查找指定元素  span  集团
+    等待 2s
+    点击查找指定元素  div   用户列表
+    确保已存在多个域用户  ${user_name}     ${domain_name}
+     ${Status}   Run Keyword and return status   校验字符串   td     集团域管理员(集团)
+    Run Keyword If   "${Status}"=="True"   移除集团管理员     ${user_name}
+    等待 2s
+
+移除集团管理员
+    [Arguments]    ${user_name}
+    点击查找指定元素  span   ${user_name}
+    等待 2s
+    点击查找指定元素   div  角色信息
+    等待 2s
+    点击查找指定元素   span  移除
+    等待 2s
+    点击元素    角色管理    close_icon  cheetah
+    等待 2s
+
+加入无权限成员
+    [Arguments]    ${role_name}   ${user_name}
+    点击管理员     ${role_name}
+    等待 2s
+    打开成员列表
+    等待 2s
+    点击加入成员    ${user_name}
+
+添加角色
+    [Arguments]    ${role_name}
+    添加新角色
+    输入名称   角色管理  role_name      ${role_name}
+    等待 2s
+    点击元素    位置管理   position_selector    cheetah
+    等待 2s
+    点击查找指定元素  li  集团
+    等待 2s
+    点击按钮    角色管理  save_button     cheetah
+
+校验角色头部基础信息
+    等待 2s
+    校验字符串   div     Automation testing
+    校验字符串   div     基本信息
+    校验字符串   div     成员列表
+    校验字符串   div     创建资源权限
+    校验字符串   div     资源读写权限
+    校验字符串   div     功能菜单权限
+
+编辑角色基本信息
+    输入多空格名称  角色管理  role_name  请输入角色名称
+    校验输入字符串  角色管理  role_name    '&quot;%()/\:?<"";|&@#*   角色名称不能超过20个字符!
+    校验输入已存在角色  Automation testing    角色名称已存在
+    点击按钮    通用    cancel_button  cheetah
+
+设定角色资源权限
+    点击查找指定元素  span  业务系统
+    点击查找指定元素  span  业务应用
+    点击查找指定元素  span  数据库集群
+    点击查找指定元素  span  虚拟化集群
+    点击查找指定元素  span  MySQL
+    点击查找指定元素  span  PostgreSQL
+    点击查找指定元素  span  Nginx
+    点击查找指定元素  span  WebSphereMQ
+    点击查找指定元素  span  容器
+    点击查找指定元素  span  虚拟数据中心
+    点击查找指定元素  span  光纤交换机
+    点击查找指定元素  span  防火墙
+    点击查找指定元素  span  主机
+    点击查找指定元素  span  存储池
+    点击查找指定元素  span  AP
+    点击查找指定元素  span  摄像机
+    点击按钮    角色管理  save_button_setting     cheetah
+
+设定资源读写权限
+    点击按钮    角色管理  add_resource     cheetah
+    校验字符串   span     资源名称
+    校验字符串   span     IP
+    校验字符串   span     资源类型
+    校验字符串   span     资源归属
+    校验字符串   span     创建时间
+    点击元素    角色管理   close_icon    cheetah
+
+设定角色功能菜单权限
+    点击查找指定元素  span  业务总览
+    等待 2s
+    点击查找指定元素  span  访问请求列表
+    等待 2s
+    点击查找指定元素  span  告警级别设置
+    点击查找指定元素  span  资源仓库
+    等待 2s
+
+
+删除已存在角色
+    [Arguments]    ${role_name}
+    悬浮Search   div   ${role_name}
+    悬浮Xpath   通用   move_to_delete_icon    cheetah
+    点击按钮    通用  delete_icon     cheetah
+    等待 2s
+    点击按钮    通用  ok_button     cheetah
+    等待 2s
+
+初始化角色管理测试环境
+    登录猎豹
+    打开菜单项  sc_icon  role_icon
+    悬浮鼠标   通用    add_button    cheetah
+    等待 2s
+    删除IP分组管理垃圾数据
+    等待 2s
+    点击元素  猎豹菜单  return  cheetah
+
+初始化分配资源权限测试环境
+    登录猎豹
+    打开菜单项  sc_icon  domain_icon
+    打开域列表
+    校验域是否存在    BMC_auto
+    校验域是否存在    Relax_auto
+    校验域是否存在    Cheet_auto
+    点击元素  猎豹菜单  return  cheetah
+    打开菜单项  sc_icon  organization_icon
+    点击集团
+    查看用户列表
+    创建用户  yaoyuan  集团
+    点击元素  猎豹菜单  return  cheetah
+    打开菜单项  sc_icon  domain_icon
+    打开域列表
+    点击已存在域    BMC_auto
+    打开域用户列表
+    校验当前域下用户是否包含用户  yaoyuan     BMC_auto
+    搜索域用户列表    yaoyuan
+    校验查询结果     yaoyuan
+    等待 5s
+    点击元素  猎豹菜单  return  cheetah
+
+添加邮件服务器
+    悬浮Search   div  通知记录
+    等待 2s
+    点击查找指定元素  div  短信服务器
+    等待 2s
+    校验字符串   span      短信设备COM端口号
+    点击查找指定元素  div  邮件服务器
+    等待 2s
+    校验字符串   span      传输协议
+    输入名称    通知管理    service_address     smtp.163.com
+    输入名称    通知管理    service_port     25
+    点击查找指定元素  span  启用
+    等待 2s
+    输入名称    通知管理    email_username     jenkins_sender@163.com
+    输入名称    通知管理    email_password     C0mputer
+    输入名称    通知管理    email_address     jenkins_sender@163.com
+    输入名称    通知管理    test_email_address     liebao657@sina.com
+    点击按钮    通知管理    test_button     cheetah
+    等待 30s
+    等待 30s
+    点击按钮    通知管理    save_button     cheetah
+编辑邮件服务器
+     等待 2s
+     点击查找指定元素  span  禁用
+     等待 2s
+     点击按钮    通知管理    save_button     cheetah
+     等待 2s
+
+
+验证Sina测试邮件格式
+    点击元素  Sina测试邮箱   automation_group_folder   cheetah
+    等待 2s
+    点击查找指定元素   a     jenkins_sender
+    等待 2s
+    点击查找指定元素   a     详细信息
+    等待 5s
+    校验Sina测试邮件格式
+
+
+
+校验邮件服务器信息
+    校验字符串   div       邮件服务器
+    校验字符串   span      传输协议
+    校验字符串   label     服务器地址
+    校验字符串   label     服务器端口
+    校验字符串   label     服务器认证
+    校验字符串   label     发送邮箱
+    校验字符串   label     测试邮箱
+    校验字符串   label     超时时间(ms)
+    校验字符串   label     SSL服务器证书
+
+校验短息服务器信息
+    校验字符串   div       短信服务器
+    点击查找指定元素  span  短信猫方式
+    校验字符串   span      短信设备COM端口号
+    校验字符串   span      短信设备波特率
+    校验字符串   span      短信SIM卡PIN码
+    校验字符串   span      短信设备厂商
+    校验字符串   span      短信设备型号
+    校验字符串   span      短信测试手机号码
+    校验字符串   label     选择为默认发送方式
+    等待 2s
+    点击查找指定元素  span  web方式
+    校验字符串   label      域名/IP
+    校验字符串   label      端口
+    校验字符串   span      Path
+    校验字符串   span      参数
+    校验字符串   label      内容参数名称
+    校验字符串   label      手机参数名称
+    校验字符串   span     短信测试手机号码
+    校验字符串   label      字符编码
+    校验字符串   label      URL
+    校验字符串   label     选择为默认发送方式
+
+校验通知记录信息
+    校验字符串   span     触发条件
+    校验字符串   span     通知发送时间
+    校验字符串   span     通知内容
+    校验字符串   span     接收人
+    校验字符串   span     通知状态
+
+校验授权信息
+    悬浮Search   span   系统管理员
+	等待 2s
+    校验字符串   div     版本信息
+    校验字符串   div     授权信息
+    校验字符串   span     授权版本
+    校验字符串   span     产品版本:
+    校验字符串   span     生成时间:
+    校验字符串   span     到期时间:
+    校验字符串   span     授权模块
+    校验字符串   span     数量
+
+初始化大数据IP分组管理测试环境
+    登录猎豹
+    打开菜单项  sc_icon  ip_icon
+    悬浮鼠标   通用    add_button    cheetah
+    等待 2s
+    删除大数据IP分组管理垃圾数据
+    等待 2s
+    点击元素  猎豹菜单  return  cheetah
+
+配置位置
+    添加上级位置  天津办公区_169区  1024
+
+初始化大数据位置管理测试环境
+    登录猎豹
+    打开菜单项  sc_icon  location_icon
+    悬浮鼠标   位置管理    add_position    cheetah
+    等待 2s
+    删除大数据位置管理垃圾数据
+    等待 2s
+    点击元素  猎豹菜单  return  cheetah
+
+创建业务
+    [Arguments]    ${business_name}   ${degree}   ${frequency}  ${url}  ${alias}
+    点击元素    业务体验     search_name   cheetah
+    输入名称    业务体验     search_name   ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  td  ${business_name}
+    Run Keyword If   "${Status}"=="True"   新建业务   ${business_name}   ${degree}   ${frequency}  ${url}  ${alias}
+创建多url业务
+    [Arguments]    ${business_name}   ${degree}   ${frequency}  ${url1}   ${alias1}   ${url2}    ${alias2}
+    点击元素    业务体验     search_name   cheetah
+    输入名称    业务体验     search_name   ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  td  ${business_name}
+    Run Keyword If   "${Status}"=="True"   新建多url业务   ${business_name}   ${degree}   ${frequency}  ${url1}   ${alias1}   ${url2}    ${alias2}
+
+新建多url业务
+    [Arguments]    ${business_name}   ${degree}   ${frequency}  ${url1}   ${alias1}   ${url2}    ${alias2}
+    悬浮Xpath   大数据工具  add_button   cheetah
+    等待 2s
+    点击按钮    大数据工具  add_button     cheetah
+    等待 2s
+    输入名称    大数据工具   business_name  ${business_name}
+    点击查找指定元素  span  ${degree}
+    点击查找指定元素  span  ${frequency}
+    等待 2s
+    输入名称    大数据工具   url     ${url1}
+    等待 2s
+    输入名称    大数据工具   url_alias     ${alias1}
+    等待 2s
+    点击元素    业务体验    add_url     cheetah
+    等待 2s
+    输入名称    大数据工具   url1    ${url2}
+    输入名称    大数据工具   url_alias1     ${alias2}
+    点击按钮    大数据工具  save_button     cheetah
+    等待 5s
+
+设置业务登录探测
+    点击元素   业务体验    setting_element     cheetah
+    校验字符串   div    设置登录探测
+    等待 2s
+#    上传脚本   C\:\\Users\\me\\Desktop    SIDE.side    成功
+    上传脚本   C\:\\Jenkins\\workspace\\Win10_robot\\upload_file\\Selenium tests    SIDE.side    成功
+    等待 2s
+    点击元素   业务体验    landing_detection_button_close    cheetah
+    等待 2s
+
+新建业务
+    [Arguments]    ${business_name}   ${degree}   ${frequency}  ${url}  ${alias}
+    悬浮Xpath   大数据工具  add_button   cheetah
+    等待 2s
+    点击按钮    大数据工具  add_button     cheetah
+    等待 2s
+    输入名称    大数据工具   business_name  ${business_name}
+    点击查找指定元素  span  ${degree}
+    点击查找指定元素  span  ${frequency}
+    输入名称    大数据工具   url     ${url}
+    输入名称    大数据工具   url_alias     ${alias}
+    点击按钮    大数据工具  save_button     cheetah
+    等待 5s
+
+校验业务名称重复
+    校验字符串   div     该业务名称已存在，请重新输入
+
+重新设定端口号
+    [Arguments]    ${port}
+    双击Xpath     大数据工具   port   cheetah
+    模拟退格键Xpath  大数据工具   port   cheetah
+    输入字符串   大数据工具   port    ${port}     cheetah
+
+校验新创建业务列表可见
+    [Arguments]    ${business_name}
+    点击元素    大数据工具  search_field  cheetah
+    输入名称    大数据工具  search_field  ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    校验字符串   td    ${business_name}
+
+初始化大数据业务应用测试环境
+    登录猎豹
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项  warehouse_icon
+    悬浮鼠标   通用    add_button    cheetah
+    等待 2s
+    点击元素    位置管理  expand_icon   cheetah
+    等待 2s
+    点击查找指定元素  span  业务应用
+    等待 2s
+    删除大数据业务应用垃圾数据   BigData_App
+    等待 2s
+    删除大数据业务应用垃圾数据   PcapPkg_App
+    等待 2s
+    校验大数据业务应用被删除
+
+初始化添加删除业务测试环境
+    [Arguments]  ${business_name}
+    登录猎豹
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项  warehouse_icon
+    悬浮鼠标  资源仓库     system_admin     cheetah
+    等待 2s
+    点击元素    位置管理  expand_icon   cheetah
+    等待 2s
+    点击查找指定元素  span  业务应用
+    等待 2s
+    删除大数据业务应用垃圾数据   ${business_name}
+    等待 2s
+    验证字符串不存在   div     ${business_name}
+    等待 2s
+
+删除大数据已存在业务应用
+    [Arguments]  ${parent_node}
+    悬浮Search   div   ${parent_node}
+    悬浮Xpath   通用   move_to_delete_icon    cheetah
+    点击按钮    通用  delete_icon     cheetah
+    等待 2s
+    点击按钮    通用  ok_button     cheetah
+    等待 2s
+
+校验大数据业务应用被删除
+    验证字符串不存在   div     BigData_App
+    等待 2s
+    验证字符串不存在   div     PcapPkg_App
+
+开启业务拨测
+    [Arguments]  ${business_name}
+    点击元素    大数据工具  search_field  cheetah
+    输入名称    大数据工具  search_field  ${business_name}
+    点击元素    仿真点管理  business_search   cheetah
+    等待 2s
+    点击元素    仿真点管理  search_start_business_name   cheetah
+
+设定拨测策略
+    [Arguments]  ${http_delay}   ${http_retries}   ${dns_delay}   ${dns_retries}   ${tcp_delay}   ${tcp_retries}   ${ping_delay}   ${ping_retries}
+    等待 2s
+#    点击查找指定元素  span  编辑
+    点击元素    仿真点管理   edit    cheetah
+    等待 2s
+    点击查找指定元素  div  分钟
+    等待 5s
+    点击查找指定元素  li  5分钟
+    等待 2s
+    输入名称    仿真点管理     http_delay    ${http_delay}
+    输入名称    仿真点管理     http_retries    ${http_retries}
+    悬浮Xpath    仿真点管理    tcp_probe_delay     cheetah
+    等待 2s
+    输入名称    仿真点管理     dns_delay    ${dns_delay}
+    输入名称    仿真点管理     dns_retries    ${dns_retries}
+    悬浮Xpath    仿真点管理    ping_probe_delay     cheetah
+    等待 2s
+    输入名称    仿真点管理     tcp_delay    ${tcp_delay}
+    输入名称    仿真点管理     tcp_retries    ${tcp_retries}
+    悬浮Xpath    仿真点管理    trace_probe_agreement     cheetah
+    等待 2s
+    输入名称    仿真点管理     ping_delay    ${ping_delay}
+    输入名称    仿真点管理     ping_retries    ${ping_retries}
+    悬浮Xpath    仿真点管理    trace_probe_delay     cheetah
+    等待 2s
+    点击元素    仿真点管理  tcp_button   cheetah
+#    点击查找指定元素  div  TCP
+    等待 2s
+    点击查找指定元素  li  UDP
+    等待 2s
+    点击元素    仿真点管理  save_simulation   cheetah
+
+进到告警中心策略页面
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项  alarm_notice_icon
+
+校验资源范围、通知条件、编辑可见
+    当前页面包含       告警策略    default_strategy   cheetah
+    当前页面包含       告警策略    source_scope   cheetah
+    当前页面包含       告警策略    notice_requirement   cheetah
+    当前页面包含       告警策略    edit   cheetah
+
+点击编辑按钮
+    点击元素  告警策略    edit   cheetah
+
+进到策略详情页面
+    当前页面包含       告警策略    strategy_detail   cheetah
+
+校验包含策略信息和选择资源标签
+    当前页面包含       告警策略    strategy_info   cheetah
+    当前页面包含       告警策略    choice_source   cheetah
+
+点击选择资源标签
+    点击元素  告警策略    choice_source   cheetah
+
+展示选择资源页面
+    当前页面包含       告警策略    add_source   cheetah
+
+点击加入资源
+    点击元素  告警策略    add_source   cheetah
+
+校验显示加入资源页面
+    当前页面包含       告警策略    source_type   cheetah
+
+选择业务应用
+    点击元素   告警策略    business_check   cheetah
+
+点击加入按钮
+    显示出隐藏元素  告警策略    add_button   cheetah
+    暂停
+    点击元素   告警策略    add_button   cheetah
+
+加入成功且弹出层未关闭
+    当前页面包含  告警策略    add_button     cheetah
+
+关闭弹出层窗体
+    点击元素   告警策略    close_icon   cheetah
+
+验证默认告警通知策略中添加资源成功
+    进到告警中心策略页面
+    当前页面包含  告警策略    business_app_2   cheetah
+
+默认卡慢告警策略存在
+    打开菜单项  sc_icon  location_icon
+    暂停
+    添加位置名称和上级位置校验卡慢
+    关闭所有浏览器
+    登录猎豹
+
+进到业务卡慢告警策略页面
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项  alarm_slowly
+
+页面跳转到告警中心/业务卡慢告警策略/策略详情
+    当前页面包含  告警策略    business_slowly   cheetah
+    当前页面包含   告警策略     alarm_center    cheetah
+
+添加卡慢策略
+    显示出隐藏元素  告警策略    add_slowly_strategy   cheetah
+    点击元素    告警策略     add_slowly_strategy    cheetah
+
+输入空白策略名称
+    清空输入框   告警策略    input_strategy_name   cheetah
+
+提示`请输入策略名称`
+    当前页面包含  告警策略    tips_input_strategy   cheetah
+
+输入默认卡慢告警策略
+    输入字符串  告警策略    input_strategy_name      默认卡慢告警策略   cheetah
+
+查看设置生效位置
+    显示出隐藏元素  告警策略    location_valid   cheetah
+    点击元素  告警策略    location_valid   cheetah
+
+展开位置列表且包含至少一个位置信息
+    当前页面包含  告警策略    location_one   cheetah
+    当前页面包含  告警策略    location_two   cheetah
+
+用户选择某一个位置
+    点击元素  告警策略    Thailand   cheetah
+
+添加位置名称和上级位置校验卡慢
+    创建上级位置  泰国   1024
+    等待 2s
+    添加位置
+    输入字符串   位置管理  input_lacation_name   曼谷   cheetah
+    输入字符串   位置管理    input_bandwidth_name  1024   cheetah
+    保存添加位置
+
+删除已存在位置卡慢
+    悬浮Search   span   泰国
+    等待 2s
+    点击元素    位置管理  delete_icon   cheetah
+    点击按钮    通用  ok_button     cheetah
+
+删除已存在位置校验卡慢
+    菜单项  location_icon
+    显示出隐藏元素  位置管理    add_position    cheetah
+    悬浮鼠标     位置管理    uae    cheetah
+    点击元素    位置管理  delete_uae   cheetah
+    点击按钮    通用  ok_button     cheetah
+
+查看设置生效业务
+    点击元素    告警策略      business_valid     cheetah
+
+展开业务选项
+    当前页面包含  告警策略    business_one   cheetah
+    当前页面包含  告警策略    business_two   cheetah
+
+用户选择关联业务
+    点击元素     告警策略    business_one   cheetah
+
+用户保存
+    点击元素   告警策略    strategy_save    cheetah
+
+验证配置默认卡慢策略成功
+    关闭所有浏览器
+    登录猎豹
+    进到业务卡慢告警策略页面
+    页面跳转到告警中心/业务卡慢告警策略/策略详情
+    当前页面包含  告警策略    check_oa   cheetah
+    关闭所有浏览器
+    登录猎豹
+    打开菜单项  sc_icon  location_icon
+    删除已存在位置校验卡慢
+
+用户可创建告警策略
+    打开菜单项  sc_icon  location_icon
+    暂停
+    添加位置名称和上级位置校验卡慢
+    关闭所有浏览器
+    登录猎豹
+
+点击添加卡慢告警策略
+    显示出隐藏元素   告警策略    default    cheetah
+    暂停
+    点击元素    告警策略     add_strategy     cheetah
+    输入字符串    告警策略            input_strategy_name        卡慢告警策略_001      cheetah
+
+关闭用户策略状态
+    点击元素  告警策略     status     cheetah
+
+策略置为关闭状态
+    当前页面包含    告警策略     status_off    cheetah
+
+每个指标都有数无空值
+    校验输入框为非空值     告警策略     value_1    cheetah
+    校验输入框为非空值     告警策略     value_2    cheetah
+    校验输入框为非空值     告警策略     value_3    cheetah
+    校验输入框为非空值     告警策略     value_4    cheetah
+    校验输入框为非空值     告警策略     value_5    cheetah
+    校验输入框为非空值     告警策略     value_6    cheetah
+    校验输入框为非空值     告警策略     value_7    cheetah
+    校验输入框为非空值     告警策略     value_8    cheetah
+    校验输入框为非空值     告警策略     value_9    cheetah
+    校验输入框为非空值     告警策略     value_10    cheetah
+
+验证新建配置卡慢策略成功
+    关闭所有浏览器
+    登录猎豹
+    进到业务卡慢告警策略页面
+    页面跳转到告警中心/业务卡慢告警策略/策略详情
+    当前页面包含  告警策略    new   cheetah
+    关闭所有浏览器
+    登录猎豹
+    打开菜单项  sc_icon  location_icon
+    删除已存在位置校验卡慢
+
+NPV已接入到猎豹, 可以查看到未知业务
+    暂停
+
+进到业务体验中心访问请求列表页面
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项  business_enjoy
+
+点击未知业务
+    显示出隐藏元素   业务体验     no_know     cheetah
+    点击元素     业务体验     no_know     cheetah
+
+未知业务高亮显示
+    当前页面包含    业务体验    no_know_light   cheetah
+
+鼠标滑动到某一个行未定义数据
+    悬浮鼠标  业务体验     no_define     cheetah
+
+
+显示出添加按钮
+    当前页面包含    业务体验    business_add_icon   cheetah
+
+用户点击添加按钮
+    点击元素   业务体验    business_add_icon   cheetah
+
+检验添加业务应用中默认被填充项
+    校验字符串   div     添加业务应用
+    校验字符串   span     基本信息
+#    校验输入框为非空值     业务体验     domain_ip    cheetah
+#    校验输入框为非空值     业务体验     port    cheetah
+#    校验字符串       div     集团
+#    校验字符串       div     默认卡慢告警策略
+
+未知业务转已知业务
+   [Arguments]    ${business_name}  ${degree}   ${frequency}
+    鼠标滑动到某一个行未定义数据
+    显示出添加按钮
+    用户点击添加按钮
+    等待 2s
+    检验添加业务应用中默认被填充项
+    输入名称    业务体验     business_name   ${business_name}
+    暂停
+    点击查找指定元素    span     ${degree}
+    暂停
+    点击查找指定元素   span     ${frequency}
+    暂停
+    点击元素   业务体验    ok_button   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  div    该业务名称已存在，请重新输入
+    Run Keyword If   "${Status}"=="False"   点击元素   业务体验    business_cancel   cheetah
+
+
+
+搜索已保存的业务
+    点击元素    业务体验     app_down     cheetah
+
+已保存的业务在搜索列表
+    当前页面包含   业务体验     create_app    cheetah
+
+导航到业务总览
+    关闭所有浏览器
+    登录猎豹
+    点击元素    业务体验     list    cheetah
+
+搜索已加入的业务
+    暂停
+    输入字符串   业务体验     search_name      12345678        cheetah
+    暂停
+    点击元素   业务体验     search     cheetah
+
+点击搜索到的业务
+    暂停
+    点击元素   业务体验     business_searched     cheetah
+
+进到业务详情页面
+    当前页面包含    业务体验     business_detail     cheetah
+
+点击配置按钮
+    点击元素   业务体验     config     cheetah
+
+配置高亮显示
+    当前页面包含    业务体验     high_light_config     cheetah
+
+查看并开启仿真策略
+    显示出隐藏元素   业务体验     default_system     cheetah
+    点击元素   业务体验     default_system     cheetah
+
+仿真策略开启并高亮显示
+    当前页面包含    业务体验     default_system_on     cheetah
+
+快捷添加业务成功
+    点击元素    业务体验     business_total     cheetah
+    暂停
+    点击元素    业务体验     list     cheetah
+    暂停
+    输入字符串   业务体验     search_name      12345678        cheetah
+    暂停
+    点击元素   业务体验     search     cheetah
+    暂停
+    点击元素    业务体验    check_business     cheetah
+    暂停
+    点击元素    业务体验    delete_business     cheetah
+    暂停
+    点击元素    业务体验    confirm     cheetah
+
+查看仿真策略并开启'系统默认仿真点'
+    [Arguments]    ${business_name}     ${agent_name}
+#    点击查找指定元素    td    ${business_name}
+    点击元素    业务体验     business_name_address    cheetah
+    等待 5s
+    点击查找指定元素    div     仿真策略
+    等待 2s
+    点击元素    业务体验     search_field   cheetah
+    输入名称    业务体验     search_field   ${agent_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    查看并开启仿真策略
+进入快捷添加业务应用界面
+    打开未知业务Tab
+    等待 5s
+    显示6小时的未知业务
+
+点击快捷添加按钮
+    等待 2s
+    鼠标滑动到某一个行未定义数据
+    显示出添加按钮
+    用户点击添加按钮
+    等待 2s
+校验页面信息及快捷创建业务可同步
+    [Arguments]    ${business_name}  ${degree}   ${frequency}
+    等待 2s
+    ${Status}   Run Keyword and return status   校验页面元素不可见   业务体验     no_define     cheetah
+    Run Keyword If   "${Status}"=="False"       校验快捷创建业务可同步      ${business_name}  ${degree}   ${frequency}
+
+校验快捷创建业务可同步
+     [Arguments]    ${business_name}  ${degree}   ${frequency}
+     点击快捷添加按钮
+     校验页面信息
+     刷新页面
+     添加业务应用     ${business_name}  ${degree}   ${frequency}
+     转到业务总览
+     校验业务存在    ${business_name}
+     转到资源仓库-业务应用
+     校验业务存在，仅显示基本信息     ${business_name}
+
+校验页面信息
+    校验字符串   span    基本信息
+    等待 2s
+    校验默认选项
+    等待 2s
+    校验当前页面卡慢告警策略
+    校验当前页面登录探测
+    等待 2s
+    校验当前页面url地址自动填充
+
+校验当前页面url地址自动填充
+    ${v2}   获取value值  业务体验   url_adress2     cheetah
+    等待 2s
+    点击元素    角色管理    close_icon  cheetah
+    等待 2s
+    鼠标滑动到某一个行未定义数据
+    ${v1}   获取url地址
+    ${value2}   data_equal     ${v1}     ${v2}
+    should be true   ${value2}
+
+校验当前页面登录探测
+    校验字符串   span    URL地址
+    校验字符串   span    地址别名
+    校验字符串   span    操作
+    元素没有被显示  span   登录探测
+
+校验当前页面卡慢告警策略
+    悬浮鼠标  业务体验   droplist    cheetah
+    当前页面包含   业务体验   droplist    cheetah
+    点击元素    业务体验   droplist    cheetah
+    等待 2s
+    元素没有被显示  span   查看策略
+    等待 2s
+
+
+校验默认选项
+    当前页面包含    资源仓库     defult_degree     cheetah
+    当前页面包含    资源仓库     defult_frequency    cheetah
+
+新建业务应用
+    [Arguments]    ${business_name}  ${degree}   ${frequency}
+    点击快捷添加按钮
+    输入名称    业务体验     business_name   ${business_name}
+    暂停
+    点击查找指定元素    span     ${degree}
+    暂停
+    点击查找指定元素   span     ${frequency}
+    暂停
+    点击元素   业务体验    ok_button   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  div    该业务名称已存在，请重新输入
+    Run Keyword If   "${Status}"=="False"   点击元素   业务体验    business_cancel   cheetah
+
+添加业务应用
+    [Arguments]    ${business_name}  ${degree}   ${frequency}
+    打开未知业务Tab
+    等待 5s
+    显示6小时的未知业务
+    判断未知业务是否存在  ${business_name}  ${degree}   ${frequency}
+
+判断未知业务是否存在
+    [Arguments]    ${business_name}  ${degree}   ${frequency}
+    ${Status}   Run Keyword and return status   校验页面元素不可见   业务体验     no_define     cheetah
+    Run Keyword If   "${Status}"=="False"   转未知业务   ${business_name}  ${degree}   ${frequency}
+
+转未知业务
+    [Arguments]    ${business_name}     ${degree}   ${frequency}
+    未知业务转已知业务   ${business_name}   ${degree}   ${frequency}
+    等待 5s
+
+校验未知转已知业务成功
+    [Arguments]    ${business_name}
+    点击查找指定元素  span  已知业务
+    等待 2s
+    点击元素  业务体验  all_use     cheetah
+    等待 2s
+    点击查找指定元素   li  ${business_name}
+    等待 2s
+
+转到业务总览
+    菜单项  business_icon
+    切换业务总览到列表视图
+
+校验业务存在
+    [Arguments]    ${business_name}
+    点击元素    业务体验     search_name   cheetah
+    输入名称    业务体验     search_name  ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   校验字符串   span    暂无数据
+    Run Keyword If   "${Status}"=="False"   校验字符串   td   ${business_name}
+
+转到资源仓库-业务应用
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项   warehouse_icon
+    等待 2s
+    悬浮鼠标  资源仓库     system_admin     cheetah
+    等待 2s
+    用户点击 `业务` -> `业务应用`
+
+校验业务存在，仅显示基本信息
+    [Arguments]    ${business_name}
+    输入字符串  资源仓库      input_source     ${business_name}     cheetah
+    按键    资源仓库      input_source    ENTER    cheetah
+    校验字符串   div    ${business_name}
+    等待 2s
+    点击查找指定元素  div  ${business_name}
+    等待 2s
+    校验字符串   span    基本信息
+
+校验资源仓库中业务信息已同步
+    [Arguments]    ${business_name}
+    输入字符串  资源仓库      input_source     ${business_name}     cheetah
+    按键    资源仓库      input_source    ENTER    cheetah
+    校验字符串   div    ${business_name}
+    等待 2s
+    点击查找指定元素  div  ${business_name}
+    等待 2s
+    校验字符串   span    基本信息
+    校验当前页面业务信息已修改   degree
+    校验当前页面业务信息已修改   frequency
+
+查看资源动态信息
+   等待 2s
+   点击查找指定元素   div   动态
+   等待 2s
+   校验字符串    span    修改信息
+
+校验动态更新信息
+    [Arguments]    ${n}
+    等待 2s
+    按元素截图  资源仓库     business_dynamic_info       ../../../../../screenshot/cheetah/猎豹回归自动化测试/资源仓库/业务管理/actual_business_dynamic_info${n}.png    cheetah
+    等待 2s
+#    图片比较      ../../../../../screenshot/cheetah/猎豹回归自动化测试/资源仓库/业务管理/actual_business_dynamic_info${n}.png       ../../../../../screenshot/cheetah/猎豹回归自动化测试/资源仓库/业务管理/expect_business_dynamic_info${n}.png
+
+
+
+转到访问请求列表-已知业务
+    菜单项  business_enjoy
+    等待 2s
+    悬浮鼠标  资源仓库     system_admin     cheetah
+    等待 2s
+    点击查找指定元素  span  已知业务
+
+打开属性信息tab
+    等待 2s
+    点击查找指定元素  div   属性信息
+    等待 2s
+
+校验业务存在，且无流水
+    [Arguments]    ${business_name}
+    等待 2s
+    点击元素  业务体验  all_use     cheetah
+    等待 2s
+    点击查找指定元素   li  ${business_name}
+    等待 2s
+    校验字符串   div     暂无数据
+校验访问请求列表中业务信息已同步
+    [Arguments]    ${business_name}
+    等待 2s
+    点击元素  业务体验  all_use     cheetah
+    等待 2s
+    点击查找指定元素   li  ${business_name}
+    等待 2s
+    点击查找指定元素  span  编辑
+    等待 2s
+    校验当前页面业务信息已修改   degree
+
+校验当前页面业务信息已修改
+    [Arguments]    ${index_type}
+    当前页面包含    资源仓库     update_${index_type}     cheetah
+    等待 2s
+
+
+设置已加入业务
+    [Arguments]    ${business_name}     ${agent_name}
+    点击元素    业务体验     search_name   cheetah
+    输入名称    业务体验     search_name   ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  td  ${business_name}
+    Run Keyword If   "${Status}"=="True"   校验字符串    span    抱歉，您还没有创建业务
+     ...     ELSE    查看仿真策略并开启'系统默认仿真点'     ${business_name}    ${agent_name}
+
+打开业务列表
+     点击查找指定元素   span     业务总览
+     等待 2s
+
+校验设置成功
+     校验字符串    td    系统默认仿真点
+
+添加卡慢告警策略
+    [Arguments]    ${strategy_name}  ${position_name}   ${business_name}
+    悬浮Search   div   默认卡慢告警策略
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  div  ${strategy_name}
+    Run Keyword If   "${Status}"=="True"   新建卡慢告警策略   ${strategy_name}  ${position_name}   ${business_name}
+
+编辑默认卡慢告警策略
+    [Arguments]    ${strategy_name}   ${position_name}   ${business_name}
+    悬浮Search   div   ${strategy_name}
+    等待 2s
+    点击查找指定元素    div     ${strategy_name}
+    等待 2s
+    输入空白策略名称
+    按键    告警策略    input_strategy_name    TAB    cheetah
+    校验字符串    div   请输入策略名称
+    输入名称    告警策略    input_strategy_name     ${strategy_name}
+    按键    告警策略    input_strategy_name    TAB    cheetah
+    每个指标都有数无空值
+    等待 2s
+    ${Status}   Run Keyword and return status   校验页面元素不可见   告警策略     position_test_data     cheetah
+    Run Keyword If   "${Status}"=="True"   确保生效位置测试数据存在     ${position_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   校验页面元素不可见   告警策略     business_test_date     cheetah
+    Run Keyword If   "${Status}"=="True"   确保生效业务测试数据存在     ${business_name}
+    等待 2s
+    点击按钮    告警策略    save_button    cheetah
+
+确保生效位置测试数据存在
+    [Arguments]    ${position_name}
+    点击元素    告警策略     set_position   cheetah
+    等待 5s
+    点击查找指定元素    li     ${position_name}
+#    按键    告警策略     position    TAB    cheetah
+    点击查找指定元素  label  设置生效位置
+    等待 2s
+    校验字符串   div     ${position_name}
+
+确保生效业务测试数据存在
+    [Arguments]    ${business_name}
+    点击元素    告警策略     set_business   cheetah
+    等待 2s
+    点击查找指定元素    li    ${business_name}
+#    按键    告警策略     position    TAB    cheetah
+    点击查找指定元素  label  设置生效业务
+    等待 2s
+    校验字符串   div     ${business_name}
+
+新建卡慢告警策略
+    [Arguments]    ${strategy_name}  ${position_name}   ${business_name}
+    点击查找指定元素    span     添加卡慢告警策略
+    等待 2s
+    校验字符串    span   策略详情
+    输入名称    告警策略    input_strategy_name    ${strategy_name}
+    关闭用户策略状态
+    策略置为关闭状态
+    每个指标都有数无空值
+    点击元素    告警策略     position   cheetah
+    等待 2s
+    点击查找指定元素    li     ${position_name}
+    等待 2s
+    点击查找指定元素  label  设置生效位置
+    校验字符串   div     ${position_name}
+    点击元素    告警策略     alarm_business   cheetah
+    等待 2s
+    点击查找指定元素    li    ${business_name}
+    点击查找指定元素  label  设置生效业务
+    校验字符串   div     ${business_name}
+    等待 2s
+    点击按钮    告警策略    save_button    cheetah
+
+校验默认通知策略卡片
+    悬浮Search   div   默认通知策略
+    校验字符串    div   默认通知策略
+    校验字符串    span  所属域：集团
+    校验字符串    div   资源范围
+    校验字符串    div   通知条件
+    元素没有被显示  span   删除
+
+选择资源类型
+    [Arguments]  ${type}
+    ${Status}   Run Keyword and return status   点击查找指定元素    span    请选择资源类型
+    Run Keyword If   "${Status}"=="False"  初始化已选资源类型    ${type}
+    等待 2s
+    ${Status}   Run Keyword and return status   点击元素    告警策略     business_windowshade_icon   cheetah
+    Run Keyword If   "${Status}"=="False"   悬浮Search   span    ${type}
+    等待 2s
+    ${Status}   Run Keyword and return status   点击查找指定元素    span    ${type}
+    Run Keyword If   "${Status}"=="False"  点击元素    告警策略   add_resource_business_selector   cheetah
+
+初始化已选资源类型
+    [Arguments]  ${type}
+    悬浮Search   span    ${type}
+    等待 2s
+    点击元素    告警策略   selector_type_close_icon   cheetah
+    等待 2s
+    点击查找指定元素    span    请选择资源类型
+
+加入资源
+    [Arguments]   ${type}   ${business_name}
+    点击查找指定元素    div    加入资源
+    等待 2s
+    选择资源类型  ${type}
+    加入资源项   ${business_name}
+
+加入资源项
+    [Arguments]  ${business_name}
+    点击元素    告警策略  add_resource_search_field  cheetah
+    输入名称    告警策略  add_resource_search_field  ${business_name}
+    点击元素    告警策略  add_resource_search_icon   cheetah
+    等待 2s
+    点击元素   告警策略    business_check   cheetah
+    等待 2s
+    点击按钮    告警策略    add_resource_add_button    cheetah
+
+校验添加资源成功
+    [Arguments]  ${business_name}
+    点击元素    告警策略  search_field  cheetah
+    输入名称    告警策略  search_field   ${business_name}
+    点击元素    告警策略  search_icon   cheetah
+    等待 2s
+    校验字符串   span    ${business_name}
+
+添加资源
+    [Arguments]  ${type}   ${resource}
+    点击元素    告警策略  search_field  cheetah
+    输入名称    告警策略  search_field   ${resource}
+    点击元素    告警策略  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示    span    ${resource}
+    Run Keyword If   "${Status}"=="True"  默认通知策略中加入资源   ${type}   ${resource}
+
+默认通知策略中加入资源
+    [Arguments]  ${type}   ${resource}
+    选择资源类型     ${type}
+    校验资源类型添加成功     ${type}
+    加入资源   ${type}  ${resource}
+    关闭弹出层窗体
+
+创建短信服务器web方式
+    [Arguments]     ${ip}      ${port}    ${path}   ${parameter}   ${phone}
+    悬浮Search   div  通知记录
+    等待 2s
+    输入名称    通知管理    domain_ip     ${ip}
+    输入名称    通知管理    port     ${port}
+    输入名称    通知管理    path    ${path}
+    输入名称    通知管理    parameter     ${parameter}
+    输入名称    通知管理    phone     ${phone}
+    点击按钮    通知管理    test_button     cheetah
+    等待 30s
+    等待 30s
+    点击按钮    通知管理    save_button     cheetah
+
+校验短信发送成功
+    打开web短信接收器  http://172.17.162.99:8280/sendSMS?content=%content%&phone=%phone%&encoding=utf-8&tester_123
+    等待 2s
+    校验字符串   pre    successful!
+    关闭所有浏览器
+
+打开web短信接收器
+    [Arguments]  ${url}
+    Open Browser    ${url}  chrome
+    Delete All Cookies
+    MAXIMIZE BROWSER WINDOW
+
+打开指定业务的关系拓扑
+    [Arguments]   ${business_name}
+    点击元素    业务体验     search_name   cheetah
+    输入名称    业务体验     search_name   ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+#    点击查找指定元素     td     ${business_name}
+    点击元素    业务体验     business_name_address    cheetah
+    等待 5s
+    点击查找指定元素    div    关联拓扑
+
+打开指定业务
+    [Arguments]   ${business_name}
+    等待 2s
+    点击元素    业务体验     search_name   cheetah
+    输入名称    业务体验     search_name   ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    点击元素    业务体验     business_name_address    cheetah
+    等待 5s
+
+校验url地址和别名被修改
+    等待 2s
+    点击查找指定元素   div  配置
+    等待 2s
+   ${url1}      获取value值    大数据工具   url_alias    cheetah
+   ${alias1}     获取value值   大数据工具   url_alias1    cheetah
+   ${value1}   data_equal     ${url1}      360搜索
+   should be true   ${value1}
+   ${value2}   data_equal      ${alias1}      搜狗搜索
+   should be true   ${value2}
+   等待 2s
+校验登录探测无影响
+    当前页面包含    业务体验    landing_detection_button_open    cheetah
+    等待 2s
+    当前页面包含    业务体验    landing_detection_button_close_end    cheetah
+    等待 2s
+    点击查找指定元素   span     基本信息
+    等待 2s
+    点击元素   业务体验    setting_element     cheetah
+    等待 2s
+    校验字符串   span    SIDE.side
+    等待 2s
+    校验字符串   textarea    成功
+    等待 2s
+
+校验配置页面可编辑
+    等待 2s
+    点击查找指定元素  div   配置
+    等待 2s
+    校验默认选项
+    等待 2s
+    修改业务配置  一般
+    校验页面刷新未保存
+    修改业务配置  一般
+    点击元素    业务体验    save    cheetah
+    等待 2s
+
+校验页面刷新未保存
+    刷新页面
+    点击查找指定元素  div   配置
+    等待 2s
+    当前页面包含    资源仓库     defult_degree     cheetah
+
+修改业务配置
+    [Arguments]   ${index}
+    点击查找指定元素   span     ${index}
+    等待 2s
+
+校验非法url地址
+    输入名称    大数据工具   url     www.baidu.com
+    等待 2s
+    点击元素    业务体验    add_url     cheetah
+    校验字符串  div     请输入http://或https://开头的URL地址
+    等待 2s
+    点击元素    业务体验    cancel  cheetah
+    等待 2s
+
+修改url地址和别名
+   [Arguments]       ${url1}      ${alias1}   ${url2}      ${alias2}
+    输入名称    大数据工具   url     ${url1}
+    等待 2s
+    输入名称    大数据工具   url_alias     ${alias1}
+    等待 2s
+    输入名称    大数据工具   url1    ${url2}
+    输入名称    大数据工具   url_alias1     ${alias2}
+    等待 2s
+    点击元素   业务体验    ok_button   cheetah
+    等待 5s
+
+保存修改
+    [Arguments]   ${button}
+    点击元素    告警策略    ${button}     cheetah
+    等待 2s
+
+校验配置页面表单
+    点击查找指定元素  div   配置
+    等待 2s
+    校验表单为非编辑状态
+    等待 2s
+    点击查找指定元素    span    默认卡慢告警策略
+    等待 2s
+    校验字符串   div     已启用
+
+设置用户写权限
+    [Arguments]   ${view_title}
+    展开角色资源读写权限面板
+    点击元素    角色管理    can_write   cheetah
+    等待 2s
+
+校验表单为非编辑状态
+    元素没有被显示     span    核心
+    元素没有被显示     span    高频
+    元素没有被显示     span   登录探测
+
+切换应用体验视图
+    点击查找指定元素   span     应用体验视图
+    等待 5s
+
+校验视图显示
+    [Arguments]   ${view_title}
+    校验字符串   div     ${view_title}
+
+点击位置下拉框
+    点击元素  业务体验  select_position     cheetah
+    等待 2s
+
+校验位置下拉框显示
+    [Arguments]   ${position1}
+    等待 5s
+    校验字符串   li  ${position1}
+    等待 2s
+
+设置时间条件
+    [Arguments]   ${time1}  ${time2}    ${time3}    ${time4}    ${time5}
+    点击元素  业务体验  select_time     cheetah
+    等待 2s
+    校验时间下拉框显示  ${time1}  ${time2}    ${time3}    ${time4}    ${time5}
+    点击查找指定元素  li    ${time2}
+校验页面显示时间范围
+    [Arguments]   ${time2}  ${time5}    ${time_sub}
+    等待 2s
+    点击查找指定元素   div  ${time2}
+    等待 2s
+    点击查找指定元素   li   ${time5}
+    等待 5s
+    校验时间范围  ${time_sub}
+    等待 2s
+
+校验时间范围
+    [Arguments]     ${time_sub}
+    ${v1}   获取时间    start
+    等待 2s
+    ${v2}   获取时间    end
+    ${value2}   data sub     ${v1}     ${v2}     ${time_sub}
+    should be true   ${value2}
+
+查看开始时间显示
+    等待 2s
+    点击元素   业务体验     start_time  cheetah
+校验“开始时间显示包含系统已剔除日期”
+    等待 2s
+    当前页面包含  业务体验    disabled_cell     cheetah
+    等待 2s
+
+获取时间
+    [Arguments]   ${type}
+    ${value1}  获取自定义长度元素值    业务体验   ${type}_time     cheetah
+    [Return]    ${value1}
+    log     ${value1}
+
+获取url地址
+    ${value2}  获取元素文本    业务体验   url_adress1    cheetah
+    [Return]    ${value2}
+    log     ${value2}
+
+校验时间下拉框显示
+    [Arguments]   ${time1}  ${time2}    ${time3}    ${time4}    ${time5}
+    等待 2s
+    校验字符串   li  ${time1}
+    校验字符串   li  ${time2}
+    校验字符串   li  ${time3}
+    等待 2s
+    校验字符串   li  ${time4}
+    校验字符串   li  ${time5}
+    等待 2s
+
+校验趋势图窗口指标解释
+    [Arguments]   ${help_text}
+    等待 5s
+    悬浮鼠标   业务体验  help    cheetah
+    等待 2s
+    校验字符串   div     ${help_text}
+点击指标设置
+    等待 2s
+    点击按钮    业务体验    setting_button  cheetah
+    等待 2s
+
+校验指标解释信息
+    悬浮鼠标   业务体验  target1    cheetah
+    点击元素  业务体验  help1   cheetah
+    校验字符串   div     在线用户数：单位时间内访问当前业务的人数总和。并发连接数：单位时间内服务端的TCP建连成功总数秒级最大值，
+    等待 2s
+    悬浮鼠标   业务体验  target2    cheetah
+    点击元素   业务体验  help2   cheetah
+    校验字符串   div     衡量用户对应用性能的满意度，数值越大体验越好。Apdex=(1 × 用户满意样本数 ＋ 0.5 × 用户容忍样本数) ÷ 样本总数。
+    等待 2s
+    悬浮鼠标   业务体验  target3    cheetah
+    点击元素   业务体验  help3   cheetah
+    校验字符串   div     上行重传率：单位时间内客户端重传包个数/客户端有效载荷数量，衡量业务上行网络传输质量。
+    等待 2s
+
+鼠标滑动到某一个趋势窗口图
+    等待 2s
+    悬浮鼠标    业务体验    view1   cheetah
+    等待 5s
+
+校验“跳转至详单 按钮”和“指标解释”按钮
+    当前页面包含  业务体验    view1_turn  cheetah
+    当前页面包含  业务体验    view1_help  cheetah
+    悬浮鼠标  业务体验    view1_turn  cheetah
+    校验字符串  div  跳转至详单
+    等待 2s
+    悬浮鼠标  业务体验    view1_help  cheetah
+    校验字符串   div     在线用户数：单位时间内访问当前业务的人数总和。
+    等待 2s
+
+
+点击“跳转至详单”按钮
+    等待 2s
+    点击元素   业务体验    view1_turn  cheetah
+    等待 2s
+
+校验弹出新窗口且携带过滤条件
+    [Arguments]   ${list1}  ${list2}   ${time_sub}
+    等待 5s
+    校验字符串   div     ${list1}
+    校验字符串   div     ${list2}
+    校验时间范围   ${time_sub}
+    等待 2s
+
+修改时间范围
+    [Arguments]   ${list1}  ${list2}
+    等待 2s
+    点击查找指定元素    div     ${list1}
+    点击查找指定元素    li  ${list2}
+    等待 2s
+    鼠标滑动到某一个趋势窗口图
+    点击“跳转至详单”按钮
+    等待 2s
+
+点击确认按钮
+    点击按钮    业务体验    confirm_notice   cheetah
+    等待 2s
+
+
+校验取消页面提示信息
+    等待 2s
+    校验字符串   span    提示
+    等待 2s
+    校验字符串   p   目前系统只支持1小时以内的详单分析，将为您跳转到最近1小时的详单信息。（您可在跳转后的页面中重新修改时间。）
+    等待 2s
+    点击按钮    业务体验    cancel_notice   cheetah
+    等待 2s
+
+
+验证详单优化通过
+    [Arguments]   ${list1}  ${list2}   ${list3}  ${list4}   ${type}     ${list5}  ${list6}   ${list7}   ${list8}
+#    ${Status}   Run Keyword and return status   校验字符串   span    暂无数据
+    ${Status}   Run Keyword and return status   校验详单记录
+    Run Keyword If   "${Status}"=="False"  选择详单     ${list1}  ${list2}   ${list3}  ${list4}   ${type}     ${list5}  ${list6}   ${list7}     ${list8}
+    等待 2s
+
+选择详单
+    [Arguments]   ${list1}  ${list2}   ${list3}  ${list4}   ${type}     ${list5}  ${list6}   ${list7}   ${list8}
+    校验详单表项  ${list1}  ${list2}   ${list3}  ${list4}   ${type}     ${list5}  ${list6}   ${list7}     ${list8}
+    下载pcap
+    设置每页条数
+    校验列头固定
+
+校验详单记录
+    校验字符串   div    共
+    当前页面包含  业务体验     detailed_data    cheetah
+    当前页面包含  业务体验     detailed_record    cheetah
+
+切换详单
+    [Arguments]   ${business_list}
+    点击查找指定元素    div    详单查询
+    等待 2s
+    点击查找指定元素    div     TCP会话详单
+    点击查找指定元素   li   ${business_list}
+    等待 2s
+    点击按钮    业务体验    search_list     cheetah
+    等待 5s
+
+校验详单表项
+    [Arguments]   ${list1}  ${list2}   ${list3}  ${list4}   ${type}     ${list5}  ${list6}   ${list7}   ${list8}
+    校验字符串   div     ${list1}
+    按键    业务体验   pagination    PAGE_DOWN    cheetah
+    校验固定列   ${list2}   ${list3}  ${list4}
+    校验每列支持正序和倒序排列
+    等待 2s
+    校验列默认排序
+    校验锁定列   ${list4}   ${type}
+    校验可设置列  ${list5}  ${list6}   ${list7}   ${list8}
+
+校验每列支持正序和倒序排列
+    当前页面包含   业务体验   up_order    cheetah
+    当前页面包含   业务体验   up_order    cheetah
+    当前页面包含  业务体验    inverted_order  cheetah
+
+校验锁定列
+    [Arguments]   ${list4}  ${type}
+    等待 2s
+    当前页面包含  业务体验    table_right  cheetah
+    当前页面包含  业务体验    table_left  cheetah
+    等待 2s
+    悬浮鼠标    业务体验     ${type}_table_right      cheetah
+    按键    业务体验   pagination     PAGE_DOWN    cheetah
+#    悬浮Xpath   业务体验     pagination      cheetah
+    等待 2s
+    当前页面包含  业务体验    table_right  cheetah
+    当前页面包含  业务体验    table_left  cheetah
+    等待 2s
+
+校验固定列
+    [Arguments]   ${list2}   ${list3}  ${list4}
+    校验字符串   span     ${list2}
+    校验字符串   span     ${list3}
+    校验字符串   span     ${list4}
+
+校验列默认排序
+    当前页面包含  业务体验    inverted_order  cheetah
+    等待 2s
+
+校验可设置列
+    [Arguments]   ${list5}  ${list6}   ${list7}  ${list8}
+    等待 2s
+    点击按钮    业务体验    setting_list    cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   校验字符串   div    TCP指标选择
+    Run Keyword If   "${Status}"=="True"  打开收缩列
+    等待 2s
+    校验字符串   div    ${list5}
+    校验字符串   span     ${list6}
+    校验字符串   span     ${list7}
+    校验字符串   span     ${list8}
+    等待 2s
+    点击元素    资源仓库     close_dialog   cheetah
+    等待 2s
+
+打开收缩列
+    等待 2s
+    点击查找指定元素  span  拆连阶段
+    点击查找指定元素  span  传输阶段
+
+下载pcap
+    点击元素    业务体验    table_download_1    cheetah
+    等待 2s
+    校验字符串   div     下载提示
+    校验字符串   p   目前系统只支持10万包下载分析，超过时系统将自动截取！
+    等待 2s
+    点击按钮    业务体验    cancel_list   cheetah
+    等待 5s
+
+设置每页条数
+    等待 5s
+    按键    业务体验   pagination    PAGE_DOWN    cheetah
+    等待 2s
+    校验字符串   div     50 条/页
+
+校验列头固定
+    等待 2s
+    当前页面包含  业务体验    table_title     cheetah
+    等待 2s
+    悬浮Xpath    业务体验    table_download_1    cheetah
+    等待 2s
+    当前页面包含  业务体验    table_title     cheetah
+    等待 2s
+
+创建自定义拓扑关系
+    [Arguments]   ${default_name}  ${business_name}   ${level}   ${verify_str}
+    点击查找指定元素    div    ${default_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   元素没有被显示  span  ${business_name}
+    Run Keyword If   "${Status}"=="True"   添加自定义拓扑关系    ${default_name}  ${business_name}   ${level}   ${verify_str}
+
+添加自定义拓扑关系
+    [Arguments]   ${default_name}  ${business_name}   ${level}   ${verify_str}
+    校验字符串   span    自定义关系拓扑
+    点击元素    业务体验     new_topology_add_icon   cheetah
+    校验字符串   div    新建拓扑
+    输入名称    业务体验     new_topology_name   ${business_name}
+    等待 2s
+    点击元素    业务体验     topology_relation_level   cheetah
+    等待 2s
+    点击查找指定元素    li    ${level}
+    点击按钮    业务体验    ok_button    cheetah
+    校验自定义拓扑关系被创建成功  ${business_name}
+    保存自定义拓扑关系      ${verify_str}
+
+保存自定义拓扑关系
+    [Arguments]   ${name}
+    点击元素    业务体验     save_button   cheetah
+    等待 2s
+    校验字符串   span    ${name}
+    点击按钮    业务体验    ok_button    cheetah
+
+修改"需立即处理"告警级别名称
+    [Arguments]   ${alarm_level_name}
+    ${Status}   Run Keyword and return status   校验页面元素不可见  告警策略     alarm_level_edit01_disable  cheetah
+    Run Keyword If   "${Status}"=="True"   编辑"需立即处理"告警级别名称   ${alarm_level_name}
+
+修改"计划性处理"告警级别名称
+    [Arguments]   ${alarm_level_name}
+    ${Status}   Run Keyword and return status   校验页面元素不可见  告警策略     alarm_level_edit02_disable  cheetah
+    Run Keyword If   "${Status}"=="True"   编辑"计划性处理"告警级别名称   ${alarm_level_name}
+
+修改"需关注"告警级别名称
+    [Arguments]   ${alarm_level_name}
+    ${Status}   Run Keyword and return status   校验页面元素不可见  告警策略     alarm_level_edit03_disable  cheetah
+    Run Keyword If   "${Status}"=="True"   编辑"需关注"告警级别名称   ${alarm_level_name}
+
+编辑"需立即处理"告警级别名称
+    [Arguments]   ${alarm_level_name}
+    点击元素    告警策略     alarm_level_edit01   cheetah
+    清空输入框  告警策略    alarm_level_edit01_enable   cheetah
+    输入名称    告警策略     alarm_level_edit01_enable   ${alarm_level_name}
+    点击按钮    告警策略    save_button    cheetah
+
+编辑"计划性处理"告警级别名称
+    [Arguments]   ${alarm_level_name}
+    点击元素    告警策略     alarm_level_edit02   cheetah
+    清空输入框  告警策略    alarm_level_edit02_enable   cheetah
+    输入名称    告警策略     alarm_level_edit02_enable   ${alarm_level_name}
+    点击按钮    告警策略    save_button    cheetah
+
+编辑"需关注"告警级别名称
+    [Arguments]   ${alarm_level_name}
+    点击元素    告警策略     alarm_level_edit03   cheetah
+    清空输入框  告警策略    alarm_level_edit03_enable   cheetah
+    输入名称    告警策略     alarm_level_edit03_enable   ${alarm_level_name}
+    点击按钮    告警策略    save_button    cheetah
+
+校验告警级别名称修改成功
+    [Arguments]   ${alarm_level_name_01}   ${alarm_level_name_02}     ${alarm_level_name_03}
+    等待 2s
+    菜单项  alarm_list_icon
+    悬浮Xpath   告警策略    keyword_field    cheetah
+    校验字符串   span    ${alarm_level_name_01}
+    校验字符串   span    ${alarm_level_name_02}
+    校验字符串   span    ${alarm_level_name_03}
+
+打开数据库集群
+    [Arguments]   ${name}
+    点击元素    资源仓库  cluster_expand_icon   cheetah
+    等待 2s
+    点击查找指定元素  span  ${name}
+
+数据库集群中添加资源
+    [Arguments]   ${name}   ${ip}     ${port}  ${description}
+    等待 2s
+    点击元素    资源仓库     search_field   cheetah
+    输入名称    资源仓库     search_field   ${name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   校验页面元素不可见  资源仓库    new_cluster    cheetah
+    Run Keyword If   "${Status}"=="True"   添加数据库集群资源    ${name}   ${ip}     ${port}  ${description}
+
+添加数据库集群资源
+     [Arguments]   ${name}   ${ip}     ${port}  ${description}
+    点击元素    通用     add_button   cheetah
+    等待 2s
+    当前页面包含  资源仓库    default_cluster_name    cheetah
+    输入名称    资源仓库     cluster_name  ${name}
+    输入名称    资源仓库     cluster_ip  ${ip}
+    输入名称    资源仓库     cluster_port  ${port}
+    输入名称    资源仓库     cluster_description  ${description}
+    当前页面包含  资源仓库    cluster_domain    cheetah
+    点击按钮    仿真点管理    confirm_button    cheetah
+    等待 2s
+
+打开容器
+    点击元素    资源仓库  vessel_expand_icon   cheetah
+    等待 2s
+    点击元素    资源仓库    vessel_button    cheetah
+    等待 2s
+
+容器中添加资源
+    [Arguments]   ${name}   ${id}     ${types}     ${mirror}     ${port}    ${command}    ${size}
+    等待 2s
+    点击元素    资源仓库     search_field   cheetah
+    输入名称    资源仓库     search_field   ${name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   校验页面元素不可见  资源仓库    new_vessel    cheetah
+    Run Keyword If   "${Status}"=="True"   添加容器资源    ${name}   ${id}     ${types}     ${mirror}     ${port}    ${command}    ${size}
+
+添加容器资源
+    [Arguments]   ${name}   ${id}     ${types}     ${mirror}     ${port}    ${command}    ${size}
+    点击元素    通用     add_button   cheetah
+    等待 2s
+    当前页面包含  资源仓库    default_vessel_name    cheetah
+    输入名称    资源仓库     cluster_name  ${name}
+    输入名称    资源仓库     vessel_id  ${id}
+    输入名称    资源仓库     vessel_types  ${types}
+    输入名称    资源仓库     vessel_mirror  ${mirror}
+    输入名称    资源仓库     vessel_port  ${port}
+    输入名称    资源仓库     vessel_command  ${command}
+    execute javascript  document.documentElement.scrollTop=10000
+    输入名称    资源仓库     vessel_size  ${size}
+    等待 2s
+    当前页面包含  资源仓库    cluster_domain    cheetah
+    点击按钮    仿真点管理    confirm_button    cheetah
+    等待 2s
+
+校验容器资源添加成功
+    等待 2s
+    当前页面包含  资源仓库    new_vessel    cheetah
+
+进入容器资源
+    [Arguments]   ${name}
+    点击查找指定元素  div  ${name}
+    等待 2s
+
+编辑容器基本信息
+    [Arguments]     ${id}   ${port}     ${save_button}
+    输入名称    资源仓库     vessel_id  ${id}
+    输入名称    资源仓库     vessel_port  ${port}
+    等待 2s
+    点击查找指定元素  span  ${save_button}
+    等待 2s
+
+校验ID保存成功
+    等待 2s
+    当前页面包含    资源仓库     vessel_id_new    cheetah
+    等待 2s
+
+删除新建容器资源
+    悬浮鼠标    资源仓库    new_vessel    cheetah
+    等待 2s
+    悬浮Xpath   通用   move_to_delete_icon    cheetah
+    等待 2s
+    点击按钮    通用  delete_icon     cheetah
+    等待 2s
+    点击按钮    通用  ok_button     cheetah
+
+容器资源已经被删除
+    等待 2s
+    当前页面不包含    资源仓库    new_vessel    cheetah     1
+
+打开动作界面
+    打开业务应用  业务应用
+    搜索并打开指定业务  BigData_App_auto
+    展开资源协议Tab  资源协议
+    添加协议   添加协议    SSH     SSH协议_auto  172.17.162.122  liebao  1qa@WS3ed
+    等待 2s
+    展开动作Tab  动作
+
+查看动作处理界面
+    等待 2s
+    校验字符串   span  添加动作
+    校验字符串   span  执行动作
+    校验字符串   span  删除动作
+
+添加动作
+  [Arguments]   ${name_01}  ${type}  ${name_03}  ${name_04}     ${name_05}  ${name_06}
+  等待 2s
+   ${Status}   Run Keyword and return status   元素没有被显示  td  ${name_03}
+  Run Keyword If   "${Status}"=="True"   新建动作   ${name_01}  ${type}  ${name_03}  ${name_04}  ${name_05}  ${name_06}
+
+新建动作
+  [Arguments]   ${name_01}  ${type}  ${name_03}  ${name_04}     ${name_05}  ${name_06}
+  等待 2s
+  点击查找指定元素  span  ${name_01}
+  等待 2s
+  校验字符串   div  ${name_01}
+  校验字符串   div  ${type}
+  等待 2s
+  输入名称    资源仓库     action_name   ${name_03}
+  输入名称    资源仓库     action_command   ${name_04}
+  输入名称    资源仓库     action_shell  echo '\##################' \n echo 'INFO:' $1 $2
+  点击查找指定元素  div     基本设置
+  等待 2s
+  点击查找指定元素  div     请选择协议
+  等待 2s
+  点击查找指定元素  li      ${name_05}
+  等待 2s
+  校验字符串     div     ${name_06}
+  点击按钮    资源仓库     complete_button    cheetah
+  等待 2s
+
+校验动作添加成功
+    [Arguments]    ${name_01}  ${name_02}
+    等待 2s
+    校验字符串   td    ${name_01}
+    校验字符串   td    ${name_02}
+    当前页面包含  资源仓库    check_protocol     cheetah
+
+执行动作
+    [Arguments]    ${name_01}   ${name_02}
+    等待 2s
+    点击查找指定元素  div   全部类型
+    等待 2s
+    点击查找指定元素  li    ${name_02}
+    等待 2s
+    输入名称  资源仓库     action_search    ${name_01}
+    等待 2s
+    点击按钮  资源仓库  search_action_button    cheetah
+    等待 2s
+    点击元素  资源仓库  action_execute   cheetah
+    等待 5s
+
+查看动作执行日志
+    等待 2s
+    校验字符串   div     动作执行日志
+    等待 2s
+    校验字符串   span     执行人
+    校验字符串   span     执行结果
+    等待 2s
+    校验字符串   div     执行日志
+    等待 5s
+
+校验动作日志输出结果
+    等待 2s
+    校验字符串   span    执行成功
+    校验字符串   div    输出
+    等待 2s
+    校验字符串   textarea    \##################
+    校验字符串   textarea    INFO: 测试脚本
+
+打开业务应用
+    [Arguments]   ${name}
+    等待 2s
+    点击元素    位置管理  expand_icon   cheetah
+    等待 2s
+    点击查找指定元素  span  ${name}
+
+搜索并打开指定业务
+    [Arguments]   ${name}
+    等待 2s
+    点击元素    资源仓库     search_field   cheetah
+    输入名称    资源仓库     search_field   ${name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    点击查找指定元素  div  ${name}
+
+校验Tab组出现
+    [Arguments]   ${name_01}  ${name_02}  ${name_03}  ${name_04}  ${name_05}  ${name_06}
+    校验字符串   div     ${name_01}
+    校验字符串   div     ${name_02}
+    校验字符串   div     ${name_03}
+    校验字符串   div     ${name_04}
+    校验字符串   div     ${name_05}
+    校验字符串   div     ${name_06}
+
+添加协议
+  [Arguments]   ${name_01}  ${type}  ${name_03}  ${name_04}  ${name_05}  ${name_06}
+  等待 2s
+  ${Status}   Run Keyword and return status   元素没有被显示  td  ${name_03}
+  Run Keyword If   "${Status}"=="True"   新建协议   ${name_01}  ${type}  ${name_03}  ${name_04}  ${name_05}  ${name_06}
+
+新建协议
+  [Arguments]   ${name_01}  ${type}  ${name_03}  ${name_04}  ${name_05}  ${name_06}
+  等待 2s
+  点击查找指定元素  span  ${name_01}
+  等待 5s
+  校验字符串   div  ${name_01}
+  校验字符串   div  ${type}
+  输入名称    资源仓库     protocol_name   ${name_03}
+  输入名称    资源仓库     ip_address   ${name_04}
+  等待 2s
+  输入名称    资源仓库     username   ${name_05}
+  输入名称    资源仓库     password   ${name_06}
+  等待 2s
+  点击按钮    资源仓库     ok_button    cheetah
+
+编辑协议
+    [Arguments]   ${protocol_name}  ${type}   ${ip_address}  ${username}  ${password}
+    等待 2s
+    点击查找指定元素    td    ${protocol_name}
+    等待 5s
+    校验字符串    td     ${protocol_name}
+    校验字符串    div    ${type}
+    输入名称    资源仓库     ip_address   ${ip_address}
+    等待 2s
+    输入名称    资源仓库     username   ${username}
+    输入名称    资源仓库     password   ${password}
+    等待 2s
+    点击按钮    资源仓库     ok_button    cheetah
+    等待 2s
+
+校验协议修改成功
+    [Arguments]    ${ip_address}  ${username}
+    等待 2s
+    校验字符串    td    ${ip_address}
+    校验字符串   span   ${username}
+
+删除协议
+    [Arguments]    ${delete_protocol}
+    点击元素    资源仓库     delete_protocol    cheetah
+#    点击查找指定元素    span    ${delete_protocol}
+    等待 2s
+    点击按钮    通用  ok_button     cheetah
+    等待 2s
+
+校验协议被删除
+    [Arguments]    ${protocol_name}
+    等待 5s
+    验证字符串不存在   td     ${protocol_name}
+
+登录资源仓库
+    登录猎豹
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项   warehouse_icon
+    等待 2s
+    悬浮鼠标  资源仓库     system_admin     cheetah
+    等待 2s
+
+初始化添加域用户测试环境
+    登录猎豹
+    打开菜单项  sc_icon  domain_icon
+    打开域列表
+    校验域是否存在    Cheet_auto
+    点击元素  猎豹菜单  return  cheetah
+    打开菜单项  sc_icon  organization_icon
+    点击集团
+    查看用户列表
+    创建用户  Qingbo_auto  Cheet_auto
+    点击元素  猎豹菜单  return  cheetah
+
+打开域列表
+    悬浮Xpath   域    add_domain    cheetah
+    等待 2s
+    ${Status}   Run Keyword and return status   当前页面包含  位置管理  expand_icon    cheetah
+    Run Keyword If   "${Status}"=="True"   点击元素     位置管理  expand_icon    cheetah
+
+校验域是否存在
+    [Arguments]    ${domain_name}
+    ${Status}   Run Keyword and return status   元素没有被显示  span  ${domain_name}
+    Run Keyword If   "${Status}"=="True"   添加域     ${domain_name}
+    等待 2s
+    校验域添加成功    ${domain_name}
+
+打开域用户列表
+    点击查找指定元素  div   域用户列表
+    等待 2s
+
+校验当前域下用户是否包含用户
+    [Arguments]    ${user_name}     ${domain_name}
+    搜索用户   ${user_name}
+    ${Status}   Run Keyword and return status   校验字符串  td  ${user_name}
+    Run Keyword If   "${Status}"=="False"   添加域用户    ${user_name}    ${domain_name}
+
+查看域用户列表
+    等待 2s
+    打开域用户列表
+
+搜索域用户列表
+    [Arguments]    ${user_name}
+    输入名称    域   user_name1   ${user_name}
+    暂停
+    点击元素   域     search_user     cheetah
+
+校验查询结果
+    [Arguments]   ${user_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   校验字符串  td   ${user_name}
+    Run Keyword If   "${Status}"=="False"   校验字符串    div     暂无数据
+    等待 2s
+
+添加域用户
+   [Arguments]   ${user_name}   ${domain_name}
+   点击加入域用户
+   弹出“添加域用户”窗口
+   输入名称  域  user_name2  ${user_name}
+   按键    域   user_name2    ENTER    cheetah
+#   ${Status}   Run Keyword and return status   元素没有被显示  td   ${user_name}
+#   Run Keyword If   "${Status}"=="True"   创建域用户   ${user_name}   ${domain_name}
+#   点击元素    角色管理   close_icon    cheetah
+#   点击按钮    域  add_domain_user     cheetah
+   等待 2s
+   勾选全部BMC用户     ${user_name}
+   等待 2s
+   点击加入
+   等待 2s
+
+创建域用户
+    [Arguments]   ${user_name}  ${domain_name}
+    关闭加入域用户对话框
+    等待 2s
+    菜单项     organization_icon
+    等待 2s
+#    打开菜单项  sc_icon  organization_icon
+    悬浮Xpath  人员组织    add_department    cheetah
+    等待 2s
+    点击查找指定元素    span  集团
+    查看用户列表
+    创建用户    ${user_name}    ${domain_name}
+#    点击元素  猎豹菜单  return  cheetah
+    等待 2s
+    打开目录  sc_icon  domain_icon
+    打开域列表
+    校验域是否存在    BMC_auto
+    点击已存在域    BMC_auto
+    打开域用户列表
+    添加域用户   ${user_name}    ${domain_name}
+
+弹出“添加域用户”窗口
+    等待 2s
+    校验字符串   span     用户名
+    校验字符串   span     姓名
+    校验字符串   span     部门
+    校验字符串   span     启用状态
+
+点击加入域用户
+   点击按钮    域  add_domain_user     cheetah
+   等待 2s
+
+勾选全部BMC用户
+    [Arguments]    ${user_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   校验字符串  td    ${user_name}
+    Run Keyword If   "${Status}"=="True"   点击按钮   域    checkbox    cheetah
+    ...     ELSE    校验是否存在分页
+    等待 2s
+
+校验是否存在分页
+    [Arguments]    ${user_name}
+    ${Status}   Run Keyword and return status   当前页面包含  域   next_page   cheetah
+    Run Keyword If   "${Status}"=="True"   勾选下一页全部用户    ${user_name}
+        ...     ELSE    点击元素     角色管理    close_x     cheetah
+    等待 2s
+
+勾选下一页全部用户
+    [Arguments]    ${user_name}
+    点击元素  域   next_page   cheetah
+    勾选全部BMC用户   ${user_name}
+
+
+点击加入
+    点击按钮   域    add_user_add   cheetah
+    等待 2s
+
+校验域用户添加成功
+     [Arguments]    ${domain_user_name}
+     等待 2s
+     校验字符串  span     ${domain_user_name}
+
+
+用户有权限操作资源仓库, 导入模板已准备
+    sleep  1
+
+用户登录猎豹, 导向到 资源中心/资源仓库
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项  warehouse
+    悬浮鼠标  资源仓库     system_admin     cheetah
+用户点击 `业务` -> `业务应用`
+    sleep  2
+#    点击元素   资源仓库     business_spread     cheetah
+    点击元素    位置管理  expand_icon   cheetah
+    点击元素   资源仓库     business_app     cheetah
+
+用户点击 `业务` -> `业务系统`
+    等待 2s
+    点击元素    位置管理  expand_icon   cheetah
+    点击元素   资源仓库     business_system     cheetah
+
+校验业务系统资源列表可见
+    [Arguments]     ${business_name}
+    等待 2s
+    ${Status}   Run Keyword and return status   校验字符串   div     暂无内容
+    Run Keyword If   "${Status}"=="True"   添加新业务系统       ${business_name}
+    等待 2s
+    当前页面包含  资源仓库     list_one     cheetah
+
+添加新业务系统
+    [Arguments]     ${business_name}
+    点击 `添加资源` 图标
+    等待 2s
+    输入名称    大数据工具   business_name   ${business_name}
+    等待 2s
+    点击按钮    仿真点管理  confirm_button     cheetah
+
+导入资源
+    [Arguments]    ${source_name}    ${path}   ${name}
+    校验资源是否已导入   ${source_name}    ${path}   ${name}
+
+校验资源是否已导入
+     [Arguments]    ${source_name}    ${path}   ${name}
+    输入字符串  资源仓库      input_source     ${source_name}     cheetah
+    按键    资源仓库      input_source    ENTER    cheetah
+    ${Status}   Run Keyword and return status   校验字符串   div     ${source_name}
+    Run Keyword If   "${Status}"=="False"   批量导入资源  ${path}   ${name}
+    等待 2s
+
+批量导入资源
+    [Arguments]    ${path}   ${name}
+    刷新页面
+    用户点击 `业务` -> `业务系统`
+    ${v1}   获取当前业务条目
+    等待 2s
+    点击 `添加资源` 图标
+    批量导入可见
+    用户点击 `批量导入`
+    弹出 `批量导入` 窗口层
+    用户点击 `点击下载` 导入模板
+    无异常报错提示
+    等待 2s
+    点击 `上传文件` 按钮用户可选择模板文件上传     ${path}   ${name}
+    等待 2s
+    查看模板导入结果
+    导入完成, 导入成功和导入失败统计数
+    ${v2}     获取当前业务条目
+    ${value}   data cmp     ${v1}     ${v2}    1
+    should be true  ${value}
+
+校验业务应用资源列表可见
+    当前页面包含  资源仓库     list_one     cheetah
+
+获取当前业务条目
+    ${text1}      获取元素文本     资源仓库     count     cheetah
+    [Return]    ${text1}
+    log     ${text1}
+添加业务
+    [Arguments]    ${business_name}     ${degree}   ${frequency}
+    输入字符串  资源仓库      input_source     ${business_name}     cheetah
+    按键    资源仓库      input_source    ENTER    cheetah
+    ${Status}   Run Keyword and return status   校验字符串   div    ${business_name}
+    Run Keyword If   "${Status}"=="False"   添加新业务  ${business_name}     ${degree}   ${frequency}
+    等待 2s
+
+添加新业务
+    [Arguments]    ${business_name}     ${degree}   ${frequency}
+    点击 `添加资源` 图标
+    等待 2s
+    输入名称    大数据工具   business_name   ${business_name}
+    等待 2s
+    点击查找指定元素  span  ${degree}
+    等待 2s
+    点击查找指定元素  span  ${frequency}
+    等待 2s
+    点击按钮    仿真点管理  confirm_button     cheetah
+
+校验添加资源页面
+    点击 `添加资源` 图标
+    等待 2s
+    校验当前页面无"批量导入"不可见
+    校验字符串    div    添加资源
+    等待 2s
+    校验字符串   div     基本信息
+    等待 2s
+    校验字符串  label    业务名称
+    校验字符串  label    业务重要度
+    等待 2s
+    校验字符串  label    使用频度
+    校验字符串  label    所属域
+    校验默认选项
+
+点击 `添加资源` 图标
+    点击元素    资源仓库    add_button    cheetah
+批量导入可见
+    当前页面包含   资源仓库    import_batch   cheetah
+
+校验当前页面无"批量导入"不可见
+    等待 2s
+    校验页面元素不可见  资源仓库    import_batch   cheetah
+
+用户点击 `批量导入`
+    点击元素   资源仓库    import_batch   cheetah
+弹出 `批量导入` 窗口层
+    当前页面包含    资源仓库    upload   cheetah
+用户点击 `点击下载` 导入模板
+    点击元素    资源仓库    download   cheetah
+无异常报错提示
+    当前页面包含    资源仓库    upload   cheetah
+点击 `上传文件` 按钮用户可选择模板文件上传
+    [Arguments]    ${path}   ${name}
+    通过api上传文件       ${path}   ${name}
+
+查看模板导入结果
+     点击元素   资源仓库     close_dialog      cheetah
+
+导入完成, 导入成功和导入失败统计数
+      刷新页面
+      用户登录猎豹, 导向到 资源中心/资源仓库
+      sleep  10
+      点击元素   资源仓库     business_spread     cheetah
+      点击元素   资源仓库     business_system     cheetah
+
+校验资源导入成功
+    [Arguments]    ${source_name}   ${description}
+    输入字符串  资源仓库      input_source     ${source_name}     cheetah
+    按键    资源仓库      input_source    ENTER    cheetah
+    等待 2s
+    点击查找指定元素  div   ${source_name}
+    等待 2s
+    校验字符串   span     基本信息
+    校验字符串   label     名称
+    当前页面包含  资源仓库    check_source_name   cheetah
+    校验字符串   textarea    ${description}
+    校验字符串   div    集团
+    等待 2s
+
+用户登录猎豹, 导向到流量分析中心/流量透视
+    悬浮鼠标    猎豹菜单    business_icon   cheetah
+    等待 2s
+    菜单项  traffic_perspectiveicon_icon
+    悬浮鼠标  资源仓库     system_admin     cheetah
+
+点击位置
+    [Arguments]    ${address_name}
+    等待 2s
+    点击查找指定元素  li  ${address_name}
+
+校验默认过滤规则
+#    [Arguments]    ${source_name}
+    等待 2s
+    校验字符串   span   数据过滤规则：只展示总流量>=
+    当前页面包含  流量分析     number    cheetah
+    当前页面包含  流量分析     data    cheetah
+
+校验规则设置页面打开
+    [Arguments]    ${information}
+    等待 2s
+    当前页面包含  流量分析     rule_setting    cheetah
+    校验字符串   p    ${information}
+
+校验过滤规则
+    当前页面包含  流量分析     flow    cheetah
+    当前页面包含  流量分析     numerical_value    cheetah
+    当前页面包含  流量分析     unit    cheetah
+    当前页面包含  流量分析     default_button    cheetah
+
+清空总流量数值
+    点击元素  流量分析    click_value   cheetah
+    按键    流量分析    click_value    BACKSPACE    cheetah
+    点击按钮    流量分析    ok_button    cheetah
+
+校验出现的错误提示
+    [Arguments]    ${information}
+    校验字符串   div    ${information}
+
+输入小于0的整数
+    [Arguments]    ${number}
+    点击元素  流量分析    click_value   cheetah
+    输入字符串    流量分析    click_value_1   ${number}    cheetah
+    点击元素    流量分析     rule_setting    cheetah
+
+校验数值自动填充为0
+    当前页面包含  流量分析     numerical_value_1    cheetah
+
+输入数值
+    [Arguments]    ${number}
+    点击元素  流量分析    click_value   cheetah
+    双击Xpath     流量分析   port   cheetah
+    按键    流量分析    click_value    BACKSPACE    cheetah
+    输入字符串    流量分析    click_value_1   ${number}    cheetah
+    点击元素    流量分析     rule_setting    cheetah
+
+重设过滤规则
+    [Arguments]    ${number}    ${unit}
+    输入数值  ${number}
+    设置单位    ${unit}
+
+点击复位键
+    点击元素  流量分析     default_button    cheetah
+    等待 2s
+
+校验数值自动填充为1024
+    当前页面包含  流量分析     numerical_value_1024    cheetah
+
+点击减小箭头
+    点击元素  流量分析    click_value   cheetah
+    点击元素    流量分析    down_button    cheetah
+
+点击增大箭头
+    点击元素  流量分析    click_value   cheetah
+    点击元素    流量分析    up_button    cheetah
+
+查看单位下拉框下拉选项
+    点击元素    流量分析    unit_select    cheetah
+    等待 2s
+
+校验单位
+    [Arguments]    ${unit_1}    ${unit_2}   ${unit_3}   ${unit_4}
+    校验字符串   li  ${unit_1}
+    校验字符串   li  ${unit_2}
+    校验字符串   li  ${unit_3}
+    校验字符串   li  ${unit_4}
+
+点击取消
+    点击按钮    流量分析    cancel_button    cheetah
+    等待 2s
+
+点击确认
+    点击按钮    流量分析    ok_button    cheetah
+    等待 2s
+
+设置单位
+    [Arguments]    ${unit}
+    点击元素    流量分析    unit_select    cheetah
+    等待 2s
+    点击查找指定元素  li  ${unit}
+
+校验修改的过滤规则
+#    [Arguments]    ${source_name}
+    校验字符串   span   数据过滤规则：只展示总流量>=
+    当前页面包含  流量分析     number_1    cheetah
+    当前页面包含  流量分析     data    cheetah
+
+校验总流量修改的过滤规则
+    #    [Arguments]    ${source_name}
+    校验字符串   span   数据过滤规则：只展示总流量>=
+    当前页面包含  流量分析     number_1024    cheetah
+    当前页面包含  流量分析     data    cheetah
+
+点击目的IP统计
+    [Arguments]    ${des_IP}
+    点击查找指定元素  span  ${des_IP}
+
+切换历史回溯
+    [Arguments]    ${historical_backtracking}   ${flow}
+    点击查找指定元素  div  ${historical_backtracking}
+    等待 2s
+    点击查找指定元素  div  ${flow}
+    等待 2s
+
+点击历史回溯
+    [Arguments]   ${business_list}
+    点击查找指定元素    div    ${business_list}
+    等待 2s
+
+切换回原窗口进行操作
+    [Arguments]   ${operation_overview}   ${historical_review}
+    sleep  2
+    悬浮Search   div   ${operation_overview}
+    点击查找指定元素    div    ${operation_overview}
+    点击历史回溯  ${historical_review}
+
+点击应用体验视图
+    [Arguments]   ${business_list}
+    点击查找指定元素    span    ${business_list}
+    等待 2s
+
+点击跳转至详单按钮
+    [Arguments]   ${analysis_window}    ${jump_window}
+    悬浮Search   div   ${analysis_window}
+    点击按钮    业务体验    ${jump_window}_turn  cheetah
+    sleep  15
+    select window   new
+
+校验新窗口打开
+    [Arguments]   ${business_list}  ${detail_type}
+    等待 2s
+    校验字符串   div   ${business_list}
+    校验字符串   div   ${detail_type}
+
+点击用户体验分析
+    悬浮Search   div   用户体验分析
+    点击按钮    业务体验    experience_analysis_button  cheetah
+    等待 30s
+
+上传脚本
+    [Arguments]  ${path}    ${file}     ${content}
+    点击按钮  业务体验    upload_script_button  cheetah
+    等待 2s
+    打开页面外文件    ${path}    ${file}
+    等待 2s
+    输入名称   业务体验    page    ${content}
+    等待 2s
+    点击按钮  业务体验    setting_ok_button  cheetah
+
+校验提示信息
+    [Arguments]  ${prompt1}    ${prompt2}
+    校验字符串   div   ${prompt1}
+    校验字符串   div   ${prompt2}
+    等待 2s
+
+校验弹出的友情提示
+    [Arguments]  ${prompt1}    ${prompt2}   ${prompt3}
+    悬浮鼠标   业务体验   prompt1    cheetah
+    等待 2s
+    校验字符串   div   ${prompt1}
+    悬浮鼠标   业务体验   prompt2    cheetah
+    等待 2s
+    校验字符串   div   ${prompt2}
+    悬浮鼠标   业务体验   prompt3    cheetah
+    等待 2s
+    校验字符串   div   ${prompt3}
+
+删除上传脚本
+    悬浮鼠标   业务体验   prompt4    cheetah
+    等待 2s
+    点击元素  业务体验    delete  cheetah
+
+脚本被删除
+    [Arguments]  ${prompt1}
+    校验字符串   div   ${prompt1}
+
+切换登陆探测按钮填写的信息不清空
+    [Arguments]  ${prompt1}     ${prompt2}
+    等待 5s
+    点击元素   业务体验    landing_detection_button_close    cheetah
+    当前页面包含    业务体验    landing_detection_button_open    cheetah
+    等待 2s
+    点击元素   业务体验    setting_element     cheetah
+    校验设置登录探测页面信息    ${prompt1}     ${prompt2}
+    点击元素   业务体验    landing_detection_button_open    cheetah
+    等待 2s
+    点击元素   业务体验    setting_element     cheetah
+    等待 2s
+    校验设置登录探测页面信息    ${prompt1}     ${prompt2}
+
+校验设置登录探测页面信息
+    [Arguments]  ${prompt1}     ${prompt2}
+    校验字符串   span   ${prompt1}
+    校验字符串   textarea  ${prompt2}
+    点击按钮  业务体验    setting_ok_button  cheetah
+    等待 2s
+
+校验默认表单项显示
+    [Arguments]    ${time_interval}    ${protocol}
+#   悬浮Search   span   ${time_interval}
+    等待 2s
+    当前页面包含    业务体验    simulation_strategy_1    cheetah
+    当前页面包含    业务体验    simulation_strategy_2    cheetah
+    当前页面包含    业务体验    simulation_strategy_3    cheetah
+    当前页面包含    业务体验    simulation_strategy_4    cheetah
+    当前页面包含    业务体验    simulation_strategy_5    cheetah
+    当前页面包含    业务体验    simulation_strategy_6    cheetah
+    当前页面包含    业务体验    simulation_strategy_7    cheetah
+    当前页面包含    业务体验    simulation_strategy_8    cheetah
+    悬浮Search   span   ${protocol}
+#   悬浮鼠标   业务体验   simulation_strategy_11    cheetah
+    等待 2s
+    当前页面包含    业务体验    simulation_strategy_9    cheetah
+    当前页面包含    业务体验    simulation_strategy_10    cheetah
+    当前页面包含    业务体验    simulation_strategy_11   cheetah
+
+点击编辑
+    点击元素  业务体验    edit   cheetah
+    等待 2s
+
+校验表单可选项
+    [Arguments]    ${time_interval_1}    ${time_interval_2}   ${time_interval_3}   ${time_interval_4}    ${time_interval_5}   ${protocol_1}   ${protocol_2}   ${protocol_3}
+    等待 2s
+    点击元素  业务体验    time_interval   cheetah
+    等待 2s
+    校验字符串   li  ${time_interval_1}
+    校验字符串   li  ${time_interval_2}
+    校验字符串   li  ${time_interval_3}
+    校验字符串   li  ${time_interval_4}
+    校验字符串   li  ${time_interval_5}
+    悬浮鼠标   业务体验   simulation_strategy_11    cheetah
+    等待 2s
+    点击元素  业务体验    protocol   cheetah
+    等待 2s
+    校验字符串   li  ${protocol_1}
+    校验字符串   li  ${protocol_2}
+    校验字符串   li  ${protocol_3}
+
+校验添加页面默认信息
+    [Arguments]  ${prompt1}     ${prompt2}
+    等待 5s
+    等待 2s
+    校验字符串   span    ${prompt1}
+    当前页面包含    业务体验    importance_core    cheetah
+    当前页面包含    业务体验    frequency_core    cheetah
+    当前页面包含    业务体验    no_delete    cheetah
+    当前页面包含    业务体验    alarm_all    cheetah
+    校验字符串   div    ${prompt2}
+
+业务名称URL地址别名为空
+    [Arguments]    ${degree}    ${frequency}
+    点击查找指定元素   span    ${degree}
+    点击查找指定元素  span  ${frequency}
+    点击按钮    大数据工具  save_button     cheetah
+    等待 2s
+
+校验提示说明
+    [Arguments]    ${prompt_1}  ${prompt_2}
+    校验字符串   div    ${prompt_1}
+    校验字符串   div    ${prompt_2}
+
+输入已存在业务名称
+    [Arguments]    ${business_name}     ${url}
+    输入名称    大数据工具   business_name  ${business_name}
+    输入名称    大数据工具   url     ${url}
+    点击按钮    大数据工具  save_button     cheetah
+    等待 2s
+
+业务名称已存在
+    [Arguments]    ${prompt_1}
+    校验字符串   div    ${prompt_1}
+
+业务名称URL地址别名超字符
+    [Arguments]    ${business_name}     ${url}   ${alias}
+    输入名称    大数据工具   business_name  ${business_name}
+    输入名称    大数据工具   url     ${url}
+    输入名称    大数据工具   url_alias     ${alias}
+    点击按钮    大数据工具  save_button     cheetah
+    等待 2s
+
+提示信息超过长度
+    [Arguments]    ${prompt_1}  ${prompt_2}     ${prompt_3}
+    校验字符串   div    ${prompt_1}
+    校验字符串   div    ${prompt_2}
+    校验字符串   div    ${prompt_3}
+
+业务名称URL地址别名有特殊字符
+    [Arguments]    ${business_name}     ${url}   ${alias}
+    输入名称    大数据工具   business_name  ${business_name}
+    输入名称    大数据工具   url     ${url}
+    输入名称    大数据工具   url_alias     ${alias}
+    点击按钮    大数据工具  save_button     cheetah
+    等待 2s
+
+业务名称URL地址别名已存在
+    [Arguments]    ${business_name}     ${url_1}   ${alias_1}   ${url_2}   ${alias_2}
+    输入名称    大数据工具   business_name  ${business_name}
+    输入名称    业务体验   url_adress_1     ${url_1}
+    输入名称    业务体验   url_alias_1     ${alias_1}
+    等待 2s
+    点击按钮    业务体验     add_button     cheetah
+    等待 2s
+#    execute javascript   document.documentElement.scrollTop=10000
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+    输入名称    业务体验   url_adress_2     ${url_2}
+    输入名称    业务体验   url_alias_2     ${alias_2}
+    点击按钮    大数据工具  save_button     cheetah
+    等待 2s
+
+提示信息已存在
+    [Arguments]   ${prompt_2}     ${prompt_3}
+#    校验字符串   div    ${prompt_1}
+    校验字符串   div    ${prompt_2}
+    校验字符串   div    ${prompt_3}
+
+输入不符合规范的URL地址
+    [Arguments]    ${business_name_1}     ${business_name_2}
+    输入名称    业务体验   url_adress_1  ${business_name_1}
+    输入名称    业务体验   url_adress_2  ${business_name_2}
+    点击按钮    大数据工具  save_button     cheetah
+    等待 2s
+
+添加十行URL地址
+    等待 2s
+#    execute javascript   document.documentElement.scrollTop=10000
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+    点击按钮    业务体验     add_button     cheetah
+    等待 2s
+    点击查找指定元素   span     基本信息
+    等待 2s
+#    execute javascript  document.documentElement.scrollTop=10000
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+    点击按钮    业务体验     add_button     cheetah
+    等待 2s
+#    悬浮鼠标    业务体验   method     cheetah
+#    execute javascript  document.documentElement.scrollTop=10000
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+    点击按钮    业务体验     add_button     cheetah
+#    悬浮鼠标    业务体验   method     cheetah
+#    execute javascript  document.documentElement.scrollTop=10000
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+    点击按钮    业务体验     add_button     cheetah
+    等待 2s
+#    execute javascript  document.documentElement.scrollTop=10000
+#    悬浮鼠标    业务体验   method     cheetah
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+    点击按钮    业务体验     add_button     cheetah
+    等待 2s
+#    悬浮鼠标    业务体验   method     cheetah
+#    execute javascript  document.documentElement.scrollTop=10000
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+    点击按钮    业务体验     add_button     cheetah
+    等待 2s
+#    execute javascript  document.documentElement.scrollTop=10000
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+    点击按钮    业务体验     add_button     cheetah
+    等待 2s
+#    execute javascript  document.documentElement.scrollTop=10000
+#    悬浮鼠标    业务体验   method     cheetah
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+    点击按钮    业务体验     add_button     cheetah
+    等待 2s
+#    悬浮鼠标    业务体验   method     cheetah
+#    execute javascript  document.documentElement.scrollTop=10000
+    按键    业务体验   url_adress_1    PAGE_DOWN    cheetah
+    等待 2s
+
+最多可添加十条
+    [Arguments]    ${prompt_1}  ${prompt_2}
+    校验字符串   span    ${prompt_1}
+    校验字符串   span    ${prompt_2}
+
+点击查看详情打开右侧抽屉
+    [Arguments]     ${any}    ${prompt}
+#    execute javascript  document.documentElement.scrollTop=10000
+#    刷新页面
+    按键    业务体验   url_adress_1    PAGE_UP    cheetah
+    点击查找指定元素   span     业务地址设置
+    等待 2s
+    点击查找指定元素      span       ${any}
+    等待 2s
+    点击查找指定元素   span   ${prompt}
+    等待 2s
+
+右侧抽屉打开
+    [Arguments]    ${prompt_1}  ${prompt_2}
+    校验字符串   span    ${prompt_1}
+    校验字符串   span    ${prompt_2}
+    等待 2s
+    点击元素    业务体验     close_button     cheetah
+    等待 2s
+
+输入正确信息并点击取消
+    [Arguments]    ${business_name}   ${degree}   ${frequency}  ${url_1}  ${alias_1}
+    点击查找指定元素   span     基本信息
+    输入名称    大数据工具   business_name  ${business_name}
+    点击查找指定元素  span  ${degree}
+    点击查找指定元素  span  ${frequency}
+    点击查找指定元素   span     业务地址设置
+    等待 2s
+    输入名称    业务体验   url_adress_1     ${url_1}
+    输入名称    业务体验   url_alias_1     ${alias_1}
+    等待 2s
+    点击按钮    业务体验  cancel_button     cheetah
+    等待 5s
+
+业务未被保存
+    [Arguments]    ${business_name}     ${no_data}
+    点击元素    大数据工具  search_field  cheetah
+    输入名称    大数据工具  search_field  ${business_name}
+    点击元素    大数据工具  search_icon   cheetah
+    等待 2s
+    校验字符串   span   ${no_data}
+
+初始化所属域测试环境
+    登录猎豹
+    打开菜单项  sc_icon  domain_icon
+    打开域列表
+    校验域是否存在    北京域_auto
+    校验域是否存在    天津域_auto
+    点击元素  猎豹菜单  return  cheetah
+    打开菜单项  sc_icon  organization_icon
+    点击集团
+    查看用户列表
+    创建用户  tongtong_auto     北京域_auto
+    点击元素  猎豹菜单  return  cheetah
+    打开菜单项  sc_icon  domain_icon
+    打开域列表
+    点击已存在域    北京域_auto
+    打开域用户列表
+    校验当前域下用户是否包含用户  tongtong_auto    北京域_auto
+    搜索域用户列表    tongtong_auto
+    校验查询结果     tongtong_auto
+    点击已存在域    天津域_auto
+    打开域用户列表
+    校验当前域下用户是否包含用户  tongtong_auto    天津域_auto
+    搜索域用户列表    tongtong_auto
+    校验查询结果     tongtong_auto
+    点击元素  猎豹菜单  return  cheetah
+    打开菜单项  sc_icon  role_icon
+    搜索域管理员   北京域_auto域管理员
+    点击管理员  北京域_auto域管理员
+    打开成员列表
+    校验当前角色下包含用户  tongtong_auto
+    等待 5s
+    搜索域管理员   天津域_auto域管理员
+    点击管理员  天津域_auto域管理员
+    打开成员列表
+    校验当前角色下包含用户  tongtong_auto
+    等待 5s
+    点击元素  猎豹菜单  return  cheetah
+
+校验当前角色下包含用户
+    [Arguments]   ${role_name}
+    等待 2s
+    输入名称    角色管理   input_role_name1   ${role_name}
+    暂停
+    点击元素   角色管理    search_role1     cheetah
+    ${Status}   Run Keyword and return status   校验字符串   td      ${role_name}
+    Run Keyword If    "${Status}"=="False"    点击加入成员     ${role_name}
+    校验成员被加入   ${role_name}
+
+校验用户所属域非集团域
+    [Arguments]    ${non_group_domain_1}  ${non_group_domain_2}
+    等待 5s
+    ${Status}   Run Keyword and return status   校验字符串   div    ${non_group_domain_1}
+    Run Keyword If   "${Status}"=="False"   校验字符串   div   ${non_group_domain_2}
+
+验证添加业务已打开
+    等待 5s
+    等待 2s
+    校验字符串   span    基本信息
+
+验证登录探测设置
+    等待 2s
+    点击元素   业务体验    setting_element     cheetah
+    校验字符串   div    设置登录探测
+    点击按钮   业务体验    setting_ok_button   cheetah
+    等待 5s
+    校验提示信息     请上传脚本文件     请输入探测成功页面应包含的内容
+    等待 2s
+    上传脚本   C\:\\Jenkins\\workspace\\Information_resources_department_auto\\upload_file\\selenium_tests    SIDE33k.side    liebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingniliebaohuanyingnil
+    等待 5s
+    校验提示信息     文件大小不能超过32k     探测成功页面应包含的内容长度，不能超过256个汉字或字符
+    等待 5s
+    上传脚本   C\:\\Jenkins\\workspace\\Information_resources_department_auto\\upload_file\\selenium_tests    SIDE_invalid.side    欢迎
+    等待 5s
+    校验字符串   div    该文件格式不正确
+    等待 2s
+    上传脚本   C\:\\Jenkins\\workspace\\Information_resources_department_auto\\upload_file\\selenium_tests    SIDE33k.js    成功
+    等待 5s
+    校验字符串   div    请上传后缀名为side的文件
+    等待 2s
+    上传脚本   C\:\\Jenkins\\workspace\\Information_resources_department_auto\\upload_file\\selenium_tests    SIDE.side    成功
+    等待 5s
+    点击元素   业务体验    setting_element     cheetah
+    等待 5s
+    校验字符串   span    SIDE.side
+    校验弹出的友情提示   上传执行登录探测所使用的脚本。    登录脚本执行成功后页面中包含设置的字符则表示登录探测成功，否则表示失败。      开启后仿真点将执行登录探测。
+    等待 2s
+    删除上传脚本
+    等待 2s
+    脚本被删除  请上传脚本文件
+    等待 2s
+    上传脚本   C\:\\Jenkins\\workspace\\Information_resources_department_auto\\upload_file\\selenium_tests    SIDE.side    成功
+    等待 2s
+    点击元素   业务体验    setting_element     cheetah
+    等待 2s
+    上传脚本   C\:\\Jenkins\\workspace\\Information_resources_department_auto\\upload_file\\selenium_tests    SIDESIDESIDESIDESIDESIDESIDESIDESIDESIDESIDESIDE.side    成功
+    切换登陆探测按钮填写的信息不清空   SIDESIDESIDESIDESIDESIDESIDESIDESIDESIDESIDESIDE.side   成功

@@ -1,0 +1,330 @@
+*** Settings ***
+Library  Selenium2Library
+Library  ../lib/riil_helper.py
+
+*** Keywords ***
+校验字符串
+    [Arguments]    ${search_type}  ${search_name}
+    ${element_name}  get common search  ${search_type}   ${search_name}
+    ${fullstr}  get text  ${element_name}
+    should contain  ${fullstr}  ${search_name}
+
+隐式等待
+    set browser implicit wait  10
+
+等待 2s
+    sleep  2
+
+等待 5s
+    sleep  5
+
+等待 30s
+    sleep  30
+
+悬浮Xpath
+    [Arguments]  ${section}  ${xpath_name}   ${product}
+    ${name}  get_xpath  ${section}  ${xpath_name}   ${product}
+    mouse over  ${name}
+
+悬浮Search
+    [Arguments]  ${search_type}   ${search_name}
+    ${name}  get common search  ${search_type}   ${search_name}
+    mouse over  ${name}
+
+点击查找指定元素
+    [Arguments]   ${search_type}   ${search_name}
+    ${button_name}  get common search  ${search_type}   ${search_name}
+    click element   ${button_name}
+
+点击查找指定元素_popup
+    [Arguments]   ${search_type}   ${search_name}   ${num}
+    ${button_name}  get_common_search_popup  ${search_type}   ${search_name}    ${num}
+    click element   ${button_name}
+
+双击Xpath
+    [Arguments]  ${section}  ${xpath_name}   ${product}
+    ${name}  get_xpath  ${section}  ${xpath_name}   ${product}
+    double click element    ${name}
+
+模拟退格键Xpath
+    [Arguments]  ${section}  ${xpath_name}   ${product}
+    ${name}  get_xpath  ${section}  ${xpath_name}   ${product}
+    Press Key    ${name}    \\8
+
+双击查找指定元素
+    [Arguments]   ${search_type}   ${search_name}
+    ${button_name}  get common search  ${search_type}   ${search_name}
+    double click element    ${button_name}
+
+点击查找指定元素链接
+    [Arguments]   ${search_type}   ${search_name}
+    ${button_name}  get common search  ${search_type}   ${search_name}
+    click link  ${button_name}
+全选
+    [Arguments]  ${section}  ${xpath_name}  ${product}
+    ${name}  get_xpath  ${section}  ${xpath_name}   ${product}
+    click button  ${name}
+
+点击按钮
+    [Arguments]  ${section}  ${xpath_name}  ${product}
+    ${name}  get_xpath  ${section}  ${xpath_name}   ${product}
+    click button  ${name}
+
+点击元素
+    [Arguments]  ${section}  ${xpath_name}  ${product}
+    ${name}  get_xpath  ${section}  ${xpath_name}   ${product}
+    click element  ${name}
+    暂停
+
+输入字符串Excel版
+    [Arguments]   ${str_xpath}   ${str_name}
+    ${user}  get data from excel  ${str_xpath}
+    input text  ${user}  ${str_name}
+
+输入字符串
+    [Arguments]   ${section}  ${xpath_name}  ${str_name}    ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    sleep   2
+    input text  ${user}  ${str_name}
+
+按键
+    [Arguments]   ${section}  ${xpath_name}  ${keyboard_name}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    press keys  ${user}  ${keyboard_name}
+
+验证字符串不存在
+    [Arguments]  ${search_type}   ${search_name}
+    ${name}  get common search  ${search_type}   ${search_name}
+    page should not contain element  ${name}
+
+验证字符串不存在Xpath
+    [Arguments]  ${section}  ${xpath_name}   ${product}
+    ${name}  get_xpath  ${section}  ${xpath_name}   ${product}
+    page should not contain element  ${name}
+
+暂停
+    sleep    2
+
+显示出隐藏元素
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+     ${user}  get_xpath  ${section}  ${xpath_name}  ${product}
+     log  ${user}
+     暂停
+     scroll element into view   ${user}
+
+清空输入框
+    [Arguments]  ${section}    ${xpath_name}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    暂停
+    Clear Element Text  ${user}
+按键操作
+    [Arguments]   ${section}    ${xpath_name}  ${key}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    暂停
+    press key  ${user}  ${key}
+刷新页面
+    reload page
+    sleep  3
+
+悬浮鼠标
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    暂停
+    Mouse Over  ${user}
+移出鼠标
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    暂停
+    mouse out  ${user}
+上传文件
+    [Arguments]   ${section}  ${xpath_name}  ${file}    ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    choose file  ${user}  ${file}
+校验空值
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    ${fullstr}  get text  ${user}
+    Should Be Empty  ${fullstr}
+
+校验非空
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    ${fullstr}  get text  ${user}
+    should not be empty  ${fullstr}
+
+#TODO
+返回元素属性
+    [Arguments]   ${section}    ${xpath_name}    ${key}     ${str}  ${product}
+     ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+     ${test}     Get Element Attribute   ${user}    ${key}
+     log     ${test}
+     Should Contain  ${test}  ${str}
+拖动元素
+    [Arguments]   ${section}    ${xpath_name1}    ${xpath_name2}     ${product}
+     ${user1}  get_xpath  ${section}  ${xpath_name1}   ${product}
+     ${user2}  get_xpath  ${section}  ${xpath_name2}   ${product}
+     Drag And Drop      ${user1}     ${user2}
+当前页面不包含
+    [Arguments]   ${section}    ${xpath_name}        ${product}  ${limit}
+    ${user1}  get_xpath  ${section}  ${xpath_name}   ${product}
+    page should not contain element       ${user1}   ${limit}
+当前页面包含
+    [Arguments]   ${section}    ${xpath_name}        ${product}
+    ${user1}  get_xpath  ${section}  ${xpath_name}   ${product}
+    page should contain element      ${user1}
+校验CheckBox勾选
+    [Arguments]   ${section}    ${xpath_name}        ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    Checkbox Should Be Selected      ${user}
+校验CheckBox未勾选
+    [Arguments]   ${section}    ${xpath_name}        ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    Checkbox Should Not Be Selected       ${user}
+校验元素为焦点
+    [Arguments]   ${section}    ${xpath_name}        ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    Element Should Be Focused       ${user}
+设置元素为焦点
+    [Arguments]   ${section}    ${xpath_name}        ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    Set Focus To Element      ${user}
+
+获取元素文本
+    [Arguments]    ${section}  ${xpath_name}   ${product}
+    ${s}  get_xpath  ${section}  ${xpath_name}  ${product}
+    ${fullstr}  get text  ${s}
+    [Return]  ${fullstr}
+
+根据相对路径上传文件
+    [Arguments]   ${section}  ${xpath_name}  ${path}    ${product}
+    ${newpath}  get_path_image_path  ${path}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    choose file  ${user}  ${newpath}
+
+通过api上传文件
+    [Arguments]   ${path}  ${file_name}
+    ${url}    get_xpath    登录页    cheetah    cheetah
+    ${ip}   string_strim    ${url}  7  21
+    upload_files    ${path}  ${file_name}  ${ip}
+
+获取自定义长度元素值
+    [Arguments]    ${section}  ${xpath_name}   ${product}
+    ${s}  get_xpath  ${section}  ${xpath_name}  ${product}
+    ${fullstr}  get value  ${s}
+    ${value}   string_strim    ${fullstr}  0  16
+    [Return]    ${value}
+    log   ${value}
+获取元素值
+    [Arguments]    ${section}  ${xpath_name}   ${product}
+    ${s}  get_xpath  ${section}  ${xpath_name}  ${product}
+    ${fullstr}  get value  ${s}
+    [Return]    ${fullstr}
+    log   ${fullstr}
+
+获取value值
+    [Arguments]    ${section}  ${xpath_name}   ${product}
+    ${s}  get_xpath  ${section}  ${xpath_name}  ${product}
+    ${fullstr}  get_value  ${s}
+    [Return]    ${fullstr}
+    log   ${fullstr}
+
+校验获取元素值
+    [Arguments]    ${section}  ${xpath_name}  ${str}   ${product}
+    ${s}  get_xpath  ${section}  ${xpath_name}  ${product}
+    ${fullstr}  get value  ${s}
+    log  ${fullstr}
+    Should Contain  ${fullstr}  ${str}
+获取当前窗口句柄
+    ${id}    get current driver
+    ${handle}   get_handle   ${id}
+    [Return]   ${handle}
+
+切换到指定窗口
+    [Arguments]  ${handle}
+    ${id}   get current driver
+    switch_special_handle       ${id}        ${handle}
+
+元素没有被显示
+    [Arguments]    ${search_type}   ${search_name}
+    ${name}  get common search  ${search_type}   ${search_name}
+    element should not be visible    ${name}
+
+图片比较
+    [Arguments]    ${act}   ${exp}
+    ${differ}     image cmp   ${act}   ${exp}   10
+    Should Be True      ${differ}<10
+
+校验图片包含
+    [Arguments]    ${actual}   ${expect}  ${value}    ${isexist}
+    ${differ}     match_img     ${actual}   ${expect}    ${value}     ${isexist}
+    Should Be True      ${differ}
+
+校验图片不包含
+    [Arguments]    ${act}   ${exp}  ${value}    ${isexist}
+    ${differ}     match_img     ${act}   ${exp}    ${value}     ${isexist}
+    should not be true   ${differ}
+
+全屏截图
+    [Arguments]    ${path}
+    log   ${path}
+    Capture Page Screenshot      ${path}
+
+按元素截图
+    [Arguments]   ${section}   ${xpath_name}   ${out_path}  ${product}
+    暂停
+    ${element}  get_xpath  ${section}  ${xpath_name}  ${product}
+    capture element screenshot  ${element}   ${out_path}
+
+
+元素是disable
+    [Arguments]    ${section}  ${xpath_name}    ${product}
+    ${s}  get_xpath  ${section}  ${xpath_name}  ${product}
+    Element Should Be Disabled      ${s}
+
+关闭所有浏览器
+    close all browsers
+
+校验网页标题
+   [Arguments]  ${title}
+   ${s}  Get Title
+   should contain       ${s}        ${title}
+校验输入框空值
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    ${fullstr}  get value  ${user}
+    Should Be Empty  ${fullstr}
+校验元素是否为焦点
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    Element Should Be Focused  ${user}
+校验页面元素可见
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+     ${element}  get_xpath  ${section}  ${xpath_name}  ${product}
+     log  ${element}
+     暂停
+     element should be visible  ${element}
+校验页面元素不可见
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+     ${element}  get_xpath  ${section}  ${xpath_name}  ${product}
+     log  ${element}
+     暂停
+     element should not be visible  ${element}
+
+清空信息并输入字符
+    [Arguments]  ${section}  ${xpath_name}  ${str_name}    ${product}
+    清空输入框  ${section}  ${xpath_name}  ${product}
+    输入字符串  ${section}  ${xpath_name}  ${str_name}    ${product}
+
+校验输入框为非空值
+    [Arguments]   ${section}    ${xpath_name}   ${product}
+    ${user}  get_xpath  ${section}  ${xpath_name}   ${product}
+    ${fullstr}  get value  ${user}
+    should not be empty   ${fullstr}
+
+打开页面外文件
+    [Arguments]  ${path}    ${file}
+    sleep  2
+    input_str_emotion   ${path}
+    sleep  5
+    input_str_emotion    ${file}
+    sleep  2
